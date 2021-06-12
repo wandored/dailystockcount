@@ -1,5 +1,13 @@
 *.csv
 *.xlsx
-*.html
 *.zip
-output/*
+*.db
+output/
+__pycache__/
+dailycount/__pycache__/
+dailycount/main/__pycache__/
+dailycount/users/__pycache__/
+dailycount/counts/__pycache__/
+dailycount/static/profile_pics/
+venv/
+downloads/
