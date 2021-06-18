@@ -1,3 +1,29 @@
 {% extends 'layout.html' %}
 {% block content %}
+  <div class="content-section">
+    <legend class="border-bottom mb-6">{{ date_time.trans_date.strftime('%m-%d-%y') }} - {{ date_time.count_time }}</legend>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Product</th>
+      <th scope="col">Total On-Hand</th>
+      <th scope="col">Theory On-Hand</th>
+      <th scope="col">Daily Variance</th>
+    </tr>
+  </thead>
+  <tbody>
+      {% for item in ordered_items %}
+      {% if item.trans_date == date_time.trans_date and item.count_time == date_time.count_time %}
+          <tr>
+            <td>{{ item.itemname }}</td>
+            <td>{{ item.count_total }}</td>
+            <td>{{ item.theory }}</td>
+            <td>{{ item.variance }}</td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+  </tbody>
+</table>
+    </div>
+    {{ results }}
 {% endblock content %}

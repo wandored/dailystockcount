@@ -1,17 +1,20 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
-from dailycount import db, bcrypt
-from dailycount.models import User, Invcount
-from dailycount.users.forms import RegistrationFrom, LoginForm, UpdateAccountForm
+from flask_admin.contrib.sqla import ModelView
+from dailycount import db, bcrypt, admin
+from dailycount.models import User
+from dailycount.users.forms import RegistrationFrom, LoginForm, UpdateAccountForm, RequestResetForm
 from dailycount.users.utils import save_picture, send_reset_email
 
 users = Blueprint('users', __name__)
+admin.add_view(ModelView(User, db.session))
 
 
 @users.route("/register/", methods=['GET', 'POST'])
+@login_required
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('counts.count'))
+    #    if current_user.is_authenticated:
+    #        return redirect(url_for('counts.count'))
     form = RegistrationFrom()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(
@@ -20,9 +23,9 @@ def register():
                     email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        flash('Your account has been created! You are now able to log in', 'success')
+        flash('Account has been created! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', title='Add New User', form=form)
 
 
 @users.route("/login/", methods=['GET', 'POST'])

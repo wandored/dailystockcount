@@ -17,17 +17,37 @@ def count():
     group_items = Invcount.query.group_by(
         Invcount.trans_date, Invcount.count_time)
     ordered_items = group_items.order_by(
-        Invcount.trans_date.desc()).paginate(page=page, per_page=10)
+        Invcount.trans_date.desc(), Invcount.count_time.desc()).paginate(page=page, per_page=10)
     form = EnterCountForm()
     if form.validate_on_submit():
-        inventory = Invcount(trans_date=form.transdate.data, count_time=form.am_pm.data, itemname=form.itemname.data.itemname,
-                             casecount=form.casecount.data, eachcount=form.eachcount.data, manager=current_user)
+        items_object = Items.query.filter_by(
+            itemname=form.itemname.data.itemname).first()
+        filter_item = Invcount.query.filter_by(
+            itemname=form.itemname.data.itemname)
+        ordered_count = filter_item.order_by(
+            Invcount.trans_date.desc()).offset(1).limit(1)
+        date = form.transdate.data
+        time = form.am_pm.data
+        inventory = Invcount(
+            trans_date=form.transdate.data,
+            count_time=form.am_pm.data,
+            itemname=form.itemname.data.itemname,
+            casecount=form.casecount.data,
+            eachcount=form.eachcount.data,
+            count_total=(items_object.casepack *
+                         form.casecount.data + form.eachcount.data),
+            previous_total=ordered_count.count_total,
+            manager=current_user)
         db.session.add(inventory)
         db.session.commit()
         flash(
             f'Count submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
+        form.transdate.data = date
+        form.am_pm.data = time
         return redirect(url_for('counts.count'))
-    return render_template('count.html', title='Enter Count', form=form, inv_items=inv_items, group_items=group_items, ordered_items=ordered_items)
+
+    return render_template('count.html', title='Enter Count', form=form,
+                           inv_items=inv_items, ordered_items=ordered_items)
 
 
 @counts.route("/count/<int:item_id>/update", methods=['GET', 'POST'])
@@ -37,11 +57,15 @@ def update_count(item_id):
     inv_items = Invcount.query.all()
     form = UpdateCountForm()
     if form.validate_on_submit():
+        items_object = Items.query.filter_by(
+            itemname=form.itemname.data).first()
         item.trans_date = form.transdate.data
         item.count_time = form.am_pm.data
         item.itemname = form.itemname.data
         item.casecount = form.casecount.data
         item.eachcount = form.eachcount.data
+        item.count_total = (items_object.casepack *
+                            form.casecount.data + form.eachcount.data)
         db.session.commit()
         flash('Item counts have been updated!', 'success')
         return redirect(url_for('counts.count'))
@@ -74,9 +98,11 @@ def purchases():
         Purchases.trans_date.desc()).paginate(page=page, per_page=10)
     form = EnterPurchasesForm()
     if form.validate_on_submit():
-        purchas = Purchases(trans_date=form.transdate.data,
-                            itemname=form.itemname.data.itemname, casecount=form.casecount.data)
-        db.session.add(purchas)
+        items_object = Items.query.filter_by(
+            itemname=form.itemname.data.itemname).first()
+        purchase = Purchases(trans_date=form.transdate.data,
+                             itemname=form.itemname.data.itemname, casecount=form.casecount.data, purchase_total=(items_object.casepack * form.casecount.data))
+        db.session.add(purchase)
         db.session.commit()
         flash(
             f'Purchases submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
@@ -91,9 +117,12 @@ def update_purchases(item_id):
     inv_items = Purchases.query.all()
     form = UpdatePurchasesForm()
     if form.validate_on_submit():
+        items_object = Items.query.filter_by(
+            itemname=form.itemname.data).first()
         item.trans_date = form.transdate.data
         item.itemname = form.itemname.data
         item.casecount = form.casecount.data
+        item.purchase_total = (items_object.casepack * form.casecount.data)
         db.session.commit()
         flash('Item purchases have been updated!', 'success')
         return redirect(url_for('counts.purchases'))
@@ -125,7 +154,7 @@ def sales():
     form = EnterSalesForm()
     if form.validate_on_submit():
         sale = Sales(trans_date=form.transdate.data, itemname=form.itemname.data.itemname,
-                     eachcount=form.eachcount.data, waste=form.waste.data)
+                     eachcount=form.eachcount.data, waste=form.waste.data, sales_total=(form.eachcount.data + form.waste.data))
         db.session.add(sale)
         db.session.commit()
         flash(
@@ -145,6 +174,7 @@ def update_sales(item_id):
         item.itemname = form.itemname.data
         item.eachcount = form.eachcount.data
         item.waste = form.waste.data
+        item.sales_total = (form.eachcount.data + form.waste.data)
         db.session.commit()
         flash('Item Sales have been updated!', 'success')
         return redirect(url_for('counts.sales'))
