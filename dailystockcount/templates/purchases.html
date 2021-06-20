@@ -51,7 +51,7 @@
     </div>
     {% for group in ordered_purchases.items %}
         <div class="content-section">
-          <legend class="border-bottom mb-6">{{ group.trans_date.strftime('%m-%d-%y') }}</legend>
+          <legend class="border-bottom mb-6">{{ group.trans_date }}</legend>
           {% for item in purchase_items%}
             {% if item.trans_date == group.trans_date  %}
               <div class="media-body">

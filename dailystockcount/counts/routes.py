@@ -1,10 +1,12 @@
+''' count/routes.py is flask routes for counts, purchases, sales and items. '''
 from flask import (render_template, url_for, flash,
-                   redirect, request, abort, Blueprint)
+                   redirect, request, Blueprint)
 from flask_login import current_user, login_required
-from dailycount import db
-from dailycount.models import Invcount, Purchases, Sales, Items
-from dailycount.counts.forms import (EnterCountForm, UpdateCountForm, EnterSalesForm,
-                                     UpdateSalesForm, EnterPurchasesForm, UpdatePurchasesForm, NewItemForm)
+from dailystockcount import db
+from dailystockcount.models import Invcount, Purchases, Sales, Items
+from dailystockcount.counts.forms import (EnterCountForm, UpdateCountForm, EnterSalesForm,
+                                          UpdateSalesForm, EnterPurchasesForm,
+                                          UpdatePurchasesForm, NewItemForm)
 
 counts = Blueprint('counts', __name__)
 
@@ -12,6 +14,7 @@ counts = Blueprint('counts', __name__)
 @counts.route("/count/", methods=['GET', 'POST'])
 @login_required
 def count():
+    ''' route for count.html '''
     page = request.args.get('page', 1, type=int)
     inv_items = Invcount.query.all()
     group_items = Invcount.query.group_by(
@@ -22,10 +25,16 @@ def count():
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
             itemname=form.itemname.data.itemname).first()
-        filter_item = Invcount.query.filter_by(
-            itemname=form.itemname.data.itemname)
-        ordered_count = filter_item.order_by(
-            Invcount.trans_date.desc()).offset(1).limit(1)
+        filter_item = Invcount.query.filter(
+            Invcount.itemname == form.itemname.data.itemname)
+        previous_count = filter_item.order_by(
+            Invcount.trans_date.desc()).offset(1).first()
+
+        purchase_item = Purchases.query.filter_by(
+            itemname=form.itemname.data.itemname, trans_date=form.transdate.data).first()
+        sales_item = Sales.query.filter_by(
+            itemname=form.itemname.data.itemname, trans_date=form.transdate.data).first()
+
         date = form.transdate.data
         time = form.am_pm.data
         inventory = Invcount(
@@ -36,7 +45,12 @@ def count():
             eachcount=form.eachcount.data,
             count_total=(items_object.casepack *
                          form.casecount.data + form.eachcount.data),
-            previous_total=ordered_count.count_total,
+            previous_total=previous_count.count_total,
+            theory=(previous_count.count_total +
+                    purchase_item.purchase_total - sales_item.sales_total),
+            daily_variance=((items_object.casepack * form.casecount.data +
+                             form.eachcount.data) - (previous_count.count_total +
+                            purchase_item.purchase_total - sales_item.sales_total)),
             manager=current_user)
         db.session.add(inventory)
         db.session.commit()
@@ -53,12 +67,25 @@ def count():
 @counts.route("/count/<int:item_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_count(item_id):
+    ''' route for count/id/update '''
     item = Invcount.query.get_or_404(item_id)
     inv_items = Invcount.query.all()
     form = UpdateCountForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
             itemname=form.itemname.data).first()
+
+        filter_item = Invcount.query.filter(
+            Invcount.itemname == form.itemname.data,
+            Invcount.trans_date <= form.transdate.data)
+        ordered_count = filter_item.order_by(
+            Invcount.trans_date.desc(), Invcount.count_time.desc()).first()
+
+        purchase_item = Purchases.query.filter_by(
+            itemname=form.itemname.data, trans_date=form.transdate.data).first()
+        sales_item = Sales.query.filter_by(
+            itemname=form.itemname.data, trans_date=form.transdate.data).first()
+
         item.trans_date = form.transdate.data
         item.count_time = form.am_pm.data
         item.itemname = form.itemname.data
@@ -66,6 +93,13 @@ def update_count(item_id):
         item.eachcount = form.eachcount.data
         item.count_total = (items_object.casepack *
                             form.casecount.data + form.eachcount.data)
+        item.previous_total = ordered_count.count_total
+        item.theory = (ordered_count.count_total +
+                       purchase_item.purchase_total - sales_item.sales_total)
+        item.daily_variance = ((items_object.casepack * form.casecount.data +
+                                form.eachcount.data) -
+                               (ordered_count.count_total + purchase_item.purchase_total -
+                                sales_item.sales_total))
         db.session.commit()
         flash('Item counts have been updated!', 'success')
         return redirect(url_for('counts.count'))
@@ -101,7 +135,10 @@ def purchases():
         items_object = Items.query.filter_by(
             itemname=form.itemname.data.itemname).first()
         purchase = Purchases(trans_date=form.transdate.data,
-                             itemname=form.itemname.data.itemname, casecount=form.casecount.data, purchase_total=(items_object.casepack * form.casecount.data))
+                             count_time='PM',
+                             itemname=form.itemname.data.itemname,
+                             casecount=form.casecount.data,
+                             purchase_total=(items_object.casepack * form.casecount.data))
         db.session.add(purchase)
         db.session.commit()
         flash(
@@ -153,8 +190,12 @@ def sales():
         Sales.trans_date.desc()).paginate(page=page, per_page=10)
     form = EnterSalesForm()
     if form.validate_on_submit():
-        sale = Sales(trans_date=form.transdate.data, itemname=form.itemname.data.itemname,
-                     eachcount=form.eachcount.data, waste=form.waste.data, sales_total=(form.eachcount.data + form.waste.data))
+        sale = Sales(trans_date=form.transdate.data,
+                     count_time='PM',
+                     itemname=form.itemname.data.itemname,
+                     eachcount=form.eachcount.data,
+                     waste=form.waste.data,
+                     sales_total=(form.eachcount.data + form.waste.data))
         db.session.add(sale)
         db.session.commit()
         flash(

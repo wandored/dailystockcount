@@ -1,10 +1,10 @@
 *.db
 output/
 __pycache__/
-dailycount/__pycache__/
-dailycount/main/__pycache__/
-dailycount/users/__pycache__/
-dailycount/counts/__pycache__/
-dailycount/static/profile_pics/
+dailystockcount/__pycache__/
+dailystockcount/main/__pycache__/
+dailystockcount/users/__pycache__/
+dailystockcount/counts/__pycache__/
+dailystockcount/static/profile_pics/
 venv/
 downloads/

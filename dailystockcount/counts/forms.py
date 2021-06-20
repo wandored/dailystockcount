@@ -1,10 +1,10 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, IntegerField
+from wtforms import StringField, SubmitField, SelectField, IntegerField, HiddenField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired
 from wtforms_sqlalchemy.fields import QuerySelectField
-from dailycount.models import Items
+from dailystockcount.models import Items
 
 
 def item_query():
@@ -20,7 +20,7 @@ class NewItemForm(FlaskForm):
 class EnterCountForm(FlaskForm):
     transdate = DateField('Count Date', format='%Y-%m-%d',
                           default=datetime.today)
-    am_pm = SelectField('Count Type', choices=['AM', 'PM'])
+    am_pm = SelectField('Count Type', choices=['PM', 'AM'])
     itemname = QuerySelectField('Item Name',
                                 query_factory=item_query, allow_blank=True, get_label='itemname')
     casecount = IntegerField('Case Count', default=0)
@@ -30,7 +30,7 @@ class EnterCountForm(FlaskForm):
 
 class UpdateCountForm(FlaskForm):
     transdate = DateField('Count Date', format='%Y-%m-%d')
-    am_pm = SelectField('Count Type', choices=['AM', 'PM'])
+    am_pm = SelectField('Count Type', choices=['PM', 'AM'])
     itemname = StringField('Item Name', validators=[DataRequired()])
     casecount = IntegerField('Case Count')
     eachcount = IntegerField('Each Count')
@@ -40,6 +40,7 @@ class UpdateCountForm(FlaskForm):
 class EnterPurchasesForm(FlaskForm):
     transdate = DateField(
         'Purchase Date', format='%Y-%m-%d', default=datetime.today)
+    am_pm = HiddenField('PM')
     itemname = QuerySelectField('Item Name',
                                 query_factory=item_query, allow_blank=True, get_label='itemname')
     casecount = IntegerField('Cases Purchased')
@@ -48,6 +49,7 @@ class EnterPurchasesForm(FlaskForm):
 
 class UpdatePurchasesForm(FlaskForm):
     transdate = DateField('Purchase Date', format='%Y-%m-%d')
+    am_pm = HiddenField('PM')
     itemname = StringField('Item Name', validators=[DataRequired()])
     casecount = IntegerField('Cases Purchased')
     submit = SubmitField('Submit!')
@@ -56,6 +58,7 @@ class UpdatePurchasesForm(FlaskForm):
 class EnterSalesForm(FlaskForm):
     transdate = DateField('Sales Date', format='%Y-%m-%d',
                           default=datetime.today)
+    am_pm = HiddenField('PM')
     itemname = QuerySelectField('Item Name',
                                 query_factory=item_query, allow_blank=True, get_label='itemname')
     eachcount = IntegerField('Each Sales', default=0)
@@ -65,6 +68,7 @@ class EnterSalesForm(FlaskForm):
 
 class UpdateSalesForm(FlaskForm):
     transdate = DateField('Sales Date', format='%Y-%m-%d')
+    am_pm = HiddenField('PM')
     itemname = StringField('Item Name', validators=[DataRequired()])
     eachcount = IntegerField('Each Sales')
     waste = IntegerField('Waste')

@@ -4,7 +4,7 @@
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         <fieldset id="" class="form-group">
-            <legend class="border-bottom mb-4">Register</legend>
+            <legend class="border-bottom mb-4">Register New User</legend>
             <div class="form-group">
                 {{ form.username.label(class="form=control-label") }}
 
@@ -70,4 +70,25 @@
     </div>
     </form>
 </div>
+  <div class="content-section">
+    <legend class="border-bottom mb-6">Registered Users</legend>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">User Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Admin</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in user_list %}
+        <tr>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.admin }}</td>
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
+    </div>
 {% endblock content %}

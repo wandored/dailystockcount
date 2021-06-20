@@ -1,10 +1,14 @@
+''' user/routes.py is the flask routes for user pages '''
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_admin.contrib.sqla import ModelView
-from dailycount import db, bcrypt, admin
-from dailycount.models import User
-from dailycount.users.forms import RegistrationFrom, LoginForm, UpdateAccountForm, RequestResetForm
-from dailycount.users.utils import save_picture, send_reset_email
+from dailystockcount import db, bcrypt, admin
+from dailystockcount.models import User
+from dailystockcount.users.forms import (RegistrationFrom,
+                                         LoginForm,
+                                         UpdateAccountForm,
+                                         RequestResetForm)
+from dailystockcount.users.utils import save_picture, send_reset_email
 
 users = Blueprint('users', __name__)
 admin.add_view(ModelView(User, db.session))
@@ -13,8 +17,8 @@ admin.add_view(ModelView(User, db.session))
 @users.route("/register/", methods=['GET', 'POST'])
 @login_required
 def register():
-    #    if current_user.is_authenticated:
-    #        return redirect(url_for('counts.count'))
+    ''' route for register.html '''
+    user_list = User.query.all()
     form = RegistrationFrom()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(
@@ -25,13 +29,14 @@ def register():
         db.session.commit()
         flash('Account has been created! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
-    return render_template('register.html', title='Add New User', form=form)
+    return render_template('register.html', title='Add New User', form=form, user_list=user_list)
 
 
 @users.route("/login/", methods=['GET', 'POST'])
 def login():
+    ''' route for login.html '''
     if current_user.is_authenticated:
-        return redirect(url_for('counts.count'))
+        return redirect(url_for('counts.account'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -46,6 +51,7 @@ def login():
 
 @users.route("/logout/")
 def logout():
+    ''' route for logout.html '''
     logout_user()
     return redirect(url_for('users.login'))
 
@@ -53,6 +59,7 @@ def logout():
 @users.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
+    ''' route for account.html '''
     form = UpdateAccountForm()
     if form.validate_on_submit():
         if form.picture.data:
@@ -74,8 +81,9 @@ def account():
 
 @users.route("/reset_password", methods=['GET', 'POST'])
 def reset_request():
+    ''' route for reset_password.html '''
     if current_user.is_authenticated:
-        return redirect(url_for('main.report'))
+        return redirect(url_for('users.account'))
     form = RequestResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -87,8 +95,9 @@ def reset_request():
 
 @users.route("/reset_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
+    ''' route for reset_password/token '''
     if current_user.is_authenticated:
-        return redirect(url_for('main.report'))
+        return redirect(url_for('users.account'))
     user = User.verify_reset_token(token)
     if user is None:
         flash('That is an invalid or expired token', 'warning')
