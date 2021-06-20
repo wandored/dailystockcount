@@ -1,3 +1,4 @@
+''' dailystockcount app initialization '''
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -29,8 +30,10 @@ def create_app(config_class=Config):
     from dailystockcount.users.routes import users  # noqa
     from dailystockcount.counts.routes import counts  # noqa
     from dailystockcount.main.routes import main  # noqa
+    from dailystockcount.errors.handlers import errors  # noqa
     app.register_blueprint(users)
     app.register_blueprint(counts)
     app.register_blueprint(main)
+    app.register_blueprint(errors)
 
     return app

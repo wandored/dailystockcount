@@ -17,5 +17,5 @@ def report():
     date_time = Invcount.query.order_by(
         Invcount.trans_date.desc(), Invcount.count_time.desc()).first()
 
-    return render_template('report.html', title='Variance-Daily', ordered_items=ordered_items,
+    return render_template('main/report.html', title='Variance-Daily', ordered_items=ordered_items,
                            inv_items=inv_items, item_names=item_names, date_time=date_time)
