@@ -3,11 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
-from dailycount.config import Config
+from flask_admin import Admin
+from dailystockcount.config import Config
 
 mail = Mail()
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+admin = Admin()
 login_manager = LoginManager()
 login_manager.login_view = 'users.login'
 login_manager.login_message_category = 'info'
@@ -21,10 +23,12 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    from dailystockcount.models import MyAdminView  # noqa
+    admin.init_app(app, index_view=MyAdminView())
 
-    from dailycount.users.routes import users  # noqa
-    from dailycount.counts.routes import counts  # noqa
-    from dailycount.main.routes import main  # noqa
+    from dailystockcount.users.routes import users  # noqa
+    from dailystockcount.counts.routes import counts  # noqa
+    from dailystockcount.main.routes import main  # noqa
     app.register_blueprint(users)
     app.register_blueprint(counts)
     app.register_blueprint(main)

@@ -79,16 +79,21 @@
 {% for group in ordered_items.items %}
   <div class="content-section">
     <legend class="border-bottom mb-6">{{ group.trans_date.strftime('%m-%d-%y') }} - {{ group.count_time }} - {{ group.manager.username }}</legend>
-    {% for item in inv_items%}
+    {% for item in inv_items %}
     {% if item.trans_date == group.trans_date and item.count_time == group.count_time %}
         <div class="media-body">
           <a class="me-2" href="{{ url_for('counts.update_count', item_id=item.id) }}">{{ item.itemname }}</a>
-          <small class="text-muted"> Case Count  -  {{ item.casecount }} / Each Count  -  {{ item.eachcount }}</small>
+          <small class="text-muted">{{ item.casecount }} Cases / {{ item.eachcount }} Each  /  {{ item.count_total }} Total {{ ordered_count}}</small>
         </div>
       {% endif %}
     {% endfor %}
   </div>
 {% endfor %}
+<div>
+    {{ purchase_item }}
+    {{ sales_item }}
+</div>
+
 {% for page_num in ordered_items.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
   {% if page_num %}
     {%if ordered_items.page == page_num %}

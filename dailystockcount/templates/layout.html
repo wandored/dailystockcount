@@ -39,9 +39,9 @@
             <a class="nav-item nav-link" href="{{ url_for('counts.new_item') }}">Inventory Items</a>
             <a class="nav-item nav-link" href="{{ url_for('users.account') }}">Account</a>
             <a class="nav-item nav-link" href="{{ url_for('users.logout') }}">Logout</a>
+            <a class="nav-item nav-link" href="{{ url_for('users.register') }}">Register</a>
             {% else %}
             <a class="nav-item nav-link" href="{{ url_for('users.login') }}">Login</a>
-            <a class="nav-item nav-link" href="{{ url_for('users.register') }}">Register</a>
             {% endif %}
           </div>
         </div>
@@ -62,7 +62,7 @@
         {% endwith %}
         {% block content %}{% endblock %}
       </div>
-      <!-- sidebar -->
+      <!-- sidebar
       <div class="col-md-4">
         <div class="content-section">
           <div class="list-group">
@@ -74,7 +74,7 @@
             <button type="button" class="list-group-item list-group-item-action" disabled>PTD Variance</button>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </main>
 

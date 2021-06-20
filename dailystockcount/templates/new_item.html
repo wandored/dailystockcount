@@ -42,7 +42,7 @@
     {% for item in inv_items %}
       <div class="media-body">
           <a class="me-2" href="{{ url_for('counts.update_item', item_id=item.id) }}">{{ item.itemname }}</a>
-          <small class="text-muted"> Case Pack Size - {{ item.casepack }} each</small>
+          <small class="text-muted">{{ item.casepack }} Each/Case</small>
       </div>
     {% endfor %}
 </div>
