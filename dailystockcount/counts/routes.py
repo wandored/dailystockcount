@@ -28,12 +28,23 @@ def count():
         filter_item = Invcount.query.filter(
             Invcount.itemname == form.itemname.data.itemname)
         previous_count = filter_item.order_by(
-            Invcount.trans_date.desc()).offset(1).first()
+            Invcount.trans_date.desc()).first()
 
         purchase_item = Purchases.query.filter_by(
-            itemname=form.itemname.data.itemname, trans_date=form.transdate.data).first()
+            itemname=form.itemname.data.itemname,
+            trans_date=form.transdate.data).first()
+        if purchase_item is None:
+            total_purchase = 0
+        else:
+            total_purchase = purchase_item.purchase_total
+
         sales_item = Sales.query.filter_by(
-            itemname=form.itemname.data.itemname, trans_date=form.transdate.data).first()
+            itemname=form.itemname.data.itemname,
+            trans_date=form.transdate.data).first()
+        if sales_item is None:
+            total_sales = 0
+        else:
+            total_sales = sales_item.sales_total
 
         date = form.transdate.data
         time = form.am_pm.data
@@ -47,10 +58,10 @@ def count():
                          form.casecount.data + form.eachcount.data),
             previous_total=previous_count.count_total,
             theory=(previous_count.count_total +
-                    purchase_item.purchase_total - sales_item.sales_total),
+                    total_purchase - total_sales),
             daily_variance=((items_object.casepack * form.casecount.data +
                              form.eachcount.data) - (previous_count.count_total +
-                            purchase_item.purchase_total - sales_item.sales_total)),
+                                                     total_purchase - total_sales)),
             manager=current_user)
         db.session.add(inventory)
         db.session.commit()
@@ -60,7 +71,7 @@ def count():
         form.am_pm.data = time
         return redirect(url_for('counts.count'))
 
-    return render_template('count.html', title='Enter Count', form=form,
+    return render_template('counts/count.html', title='Enter Count', form=form,
                            inv_items=inv_items, ordered_items=ordered_items)
 
 
@@ -79,12 +90,21 @@ def update_count(item_id):
             Invcount.itemname == form.itemname.data,
             Invcount.trans_date <= form.transdate.data)
         ordered_count = filter_item.order_by(
-            Invcount.trans_date.desc(), Invcount.count_time.desc()).first()
+            Invcount.trans_date.desc(), Invcount.count_time.desc()).offset(1).first()
 
         purchase_item = Purchases.query.filter_by(
             itemname=form.itemname.data, trans_date=form.transdate.data).first()
+        if purchase_item is None:
+            total_purchase = 0
+        else:
+            total_purchase = purchase_item.purchase_total
+
         sales_item = Sales.query.filter_by(
             itemname=form.itemname.data, trans_date=form.transdate.data).first()
+        if sales_item is None:
+            total_sales = 0
+        else:
+            total_sales = sales_item.sales_total
 
         item.trans_date = form.transdate.data
         item.count_time = form.am_pm.data
@@ -95,11 +115,10 @@ def update_count(item_id):
                             form.casecount.data + form.eachcount.data)
         item.previous_total = ordered_count.count_total
         item.theory = (ordered_count.count_total +
-                       purchase_item.purchase_total - sales_item.sales_total)
+                       total_purchase - total_sales)
         item.daily_variance = ((items_object.casepack * form.casecount.data +
-                                form.eachcount.data) -
-                               (ordered_count.count_total + purchase_item.purchase_total -
-                                sales_item.sales_total))
+                                form.eachcount.data) - (ordered_count.count_total +
+                                                        total_purchase - total_sales))
         db.session.commit()
         flash('Item counts have been updated!', 'success')
         return redirect(url_for('counts.count'))
@@ -109,7 +128,7 @@ def update_count(item_id):
         form.itemname.data = item.itemname
         form.casecount.data = item.casecount
         form.eachcount.data = item.eachcount
-    return render_template('update_count.html', title='Update Item Count', form=form, inv_items=inv_items, item=item, legend='Update Count')
+    return render_template('counts/update_count.html', title='Update Item Count', form=form, inv_items=inv_items, item=item, legend='Update Count')
 
 
 @counts.route("/count/<int:item_id>/delete", methods=['POST'])
@@ -144,7 +163,7 @@ def purchases():
         flash(
             f'Purchases submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
         return redirect(url_for('counts.purchases'))
-    return render_template('purchases.html', title='Purchases', form=form, purchase_items=purchase_items, ordered_purchases=ordered_purchases)
+    return render_template('counts/purchases.html', title='Purchases', form=form, purchase_items=purchase_items, ordered_purchases=ordered_purchases)
 
 
 @counts.route("/purchases/<int:item_id>/update", methods=['GET', 'POST'])
@@ -167,7 +186,7 @@ def update_purchases(item_id):
         form.transdate.data = item.trans_date
         form.itemname.data = item.itemname
         form.casecount.data = item.casecount
-    return render_template('update_purchases.html', title='Update Item Purchases', form=form, inv_items=inv_items, item=item, legend='Update Purchases')
+    return render_template('counts/update_purchases.html', title='Update Item Purchases', form=form, inv_items=inv_items, item=item, legend='Update Purchases')
 
 
 @counts.route("/purchases/<int:item_id>/delete", methods=['POST'])
@@ -201,7 +220,7 @@ def sales():
         flash(
             f'Sales submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
         return redirect(url_for('counts.sales'))
-    return render_template('sales.html', title='Sales', form=form, sales_items=sales_items, ordered_sales=ordered_sales)
+    return render_template('counts/sales.html', title='Sales', form=form, sales_items=sales_items, ordered_sales=ordered_sales)
 
 
 @counts.route("/sales/<int:item_id>/update", methods=['GET', 'POST'])
@@ -224,7 +243,7 @@ def update_sales(item_id):
         form.itemname.data = item.itemname
         form.eachcount.data = item.eachcount
         form.waste.data = item.waste
-    return render_template('update_sales.html', title='Update Item Sales', form=form, inv_items=inv_items, item=item, legend='Update Sales')
+    return render_template('counts/update_sales.html', title='Update Item Sales', form=form, inv_items=inv_items, item=item, legend='Update Sales')
 
 
 @counts.route("/sales/<int:item_id>/delete", methods=['POST'])
@@ -249,7 +268,7 @@ def new_item():
         db.session.commit()
         flash(f'New item created for {form.itemname.data}!', 'success')
         return redirect(url_for('counts.new_item'))
-    return render_template('new_item.html', title='New Inventory Item', form=form, inv_items=inv_items, legend='Enter New Item')
+    return render_template('counts/new_item.html', title='New Inventory Item', form=form, inv_items=inv_items, legend='Enter New Item')
 
 
 @counts.route("/item/<int:item_id>/update", methods=['GET', 'POST'])
@@ -267,7 +286,7 @@ def update_item(item_id):
     elif request.method == 'GET':
         form.itemname.data = item.itemname
         form.casepack.data = item.casepack
-    return render_template('update_item.html', title='Update Inventory Item', form=form, inv_items=inv_items, item=item, legend='Update Item')
+    return render_template('counts/update_item.html', title='Update Inventory Item', form=form, inv_items=inv_items, item=item, legend='Update Item')
 
 
 @counts.route("/item/<int:item_id>/delete", methods=['POST'])

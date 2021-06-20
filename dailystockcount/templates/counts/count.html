@@ -3,9 +3,9 @@
 <div class="content-section">
     <form method="POST" action="">
         {{ form.hidden_tag() }}
-        <fieldset id="" class="form-group">
-            <legend class="border-bottom mb-4">Enter Count</legend>
-            <div class="form-group">
+        <fieldset id="" class="form-group mb-2">
+            <legend class="border-bottom mb-2">Enter Count</legend>
+            <div class="form-group mb-1">
                 {{ form.transdate.label(class="form=control-label") }}
                 {% if form.transdate.errors %}
                     {{ form.transdate(class="form=control form-control-md is-invalid") }}
@@ -18,7 +18,7 @@
                     {{ form.transdate(class="form=control form-control-md") }}
                 {% endif %}
             </div>
-            <div class="form-group">
+            <div class="form-group mb-1">
                 {{ form.am_pm.label(class="form=control-label") }}
                 {% if form.am_pm.errors %}
                     {{ form.am_pm(class="form=control form-control-md is-invalid") }}
@@ -31,7 +31,7 @@
                     {{ form.am_pm(class="form=control form-control-md") }}
                 {% endif %}
             </div>
-            <div class="form-group">
+            <div class="form-group mb-1">
                 {{ form.itemname.label(class="form=control-label") }}
                 {% if form.itemname.errors %}
                     {{ form.itemname(class="form=control form-control-md is-invalid") }}
@@ -44,7 +44,7 @@
                     {{ form.itemname(class="form=control form-control-md") }}
                 {% endif %}
             </div>
-            <div class="form-group">
+            <div class="form-group mb-1">
                 {{ form.casecount.label(class="form=control-label") }}
                 {% if form.casecount.errors %}
                     {{ form.casecount(class="form=control form-control-md is-invalid") }}
@@ -57,7 +57,7 @@
                 {{ form.casecount(class="form=control form-control-md") }}
                 {% endif %}
             </div>
-            <div class="form-group">
+            <div class="form-group mb-1">
                 {{ form.eachcount.label(class="form=control-label") }}
                 {% if form.eachcount.errors %}
                     {{ form.eachcount(class="form=control form-control-md is-invalid") }}
@@ -78,7 +78,7 @@
 </div>
 {% for group in ordered_items.items %}
   <div class="content-section">
-    <legend class="border-bottom mb-6">{{ group.trans_date.strftime('%m-%d-%y') }} - {{ group.count_time }} - {{ group.manager.username }}</legend>
+    <legend class="border-bottom mb-6">{{ group.trans_date }} - {{ group.count_time }} - {{ group.manager.username }}</legend>
     {% for item in inv_items %}
     {% if item.trans_date == group.trans_date and item.count_time == group.count_time %}
         <div class="media-body">
