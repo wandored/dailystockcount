@@ -30,12 +30,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarMenu">
           <div class="navbar-nav ms-auto">
+            <a class="nav-item nav-link" href="{{ url_for('counts.count') }}">Count</a>
+            <a class="nav-item nav-link" href="{{ url_for('counts.purchases') }}">Purchases</a>
+            <a class="nav-item nav-link" href="{{ url_for('counts.sales') }}">Sales</a>
+            <a class="nav-item nav-link" href="{{ url_for('counts.new_item') }}">Items</a>
             {% if current_user.is_authenticated %}
             <a class="nav-item nav-link" href="{{ url_for('main.report') }}">Reports</a>
-            <a class="nav-item nav-link" href="{{ url_for('counts.new_item') }}">Inventory Items</a>
-            <a class="nav-item nav-link" href="{{ url_for('users.account') }}">Account</a>
             <a class="nav-item nav-link" href="{{ url_for('users.logout') }}">Logout</a>
-            <a class="nav-item nav-link" href="{{ url_for('users.register') }}">Register</a>
             {% else %}
             <a class="nav-item nav-link" href="{{ url_for('users.login') }}">Login</a>
             {% endif %}
@@ -61,35 +62,29 @@
           {% block content %}{% endblock %}
         </div>
       </div>
+      {% if current_user.is_authenticated %}
       <!-- Boxes -->
       <div class="col-sm-4">
         <div class="content-section">
           <div class="card bg-steel text-light">
             <div class="card-body text-center">
               <div class="h1 mb-1">
-                <i class="bi bi-list-ol"></i>
+                <i class="bi bi-person-square"></i>
               </div>
-              <a class="btn btn-success" href="{{ url_for('counts.count') }}">Count</a>
+              <a class="btn btn-warning" href="{{ url_for('users.account') }}">My Account</a>
             </div>
           </div>
           <div class="card bg-steel text-light">
             <div class="card-body text-center">
               <div class="h1 mb-1">
-                <i class="bi bi-cart4"></i>
+                <i class="bi bi-people-fill"></i>
               </div>
-              <a class="btn btn-warning" href="{{ url_for('counts.purchases') }}">Purchases</a>
-            </div>
-          </div>
-          <div class="card bg-steel text-light">
-            <div class="card-body text-center">
-              <div class="h1 mb-1">
-                <i class="bi bi-receipt-cutoff"></i>
-              </div>
-              <a class="btn btn-danger" href="{{ url_for('counts.sales') }}">Sales</a>
+              <a class="btn btn-warning" href="{{ url_for('users.register') }}">Manage Users</a>
             </div>
           </div>
         </div>
       </div>
+      {% endif %}
   </main>
   <!-- Optional JavaScript; choose one of the two! -->
 

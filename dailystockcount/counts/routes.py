@@ -14,7 +14,7 @@ counts = Blueprint('counts', __name__)
 @counts.route("/count/", methods=['GET', 'POST'])
 @login_required
 def count():
-    ''' route for count.html '''
+    ''' Enter count for an item '''
     page = request.args.get('page', 1, type=int)
     inv_items = Invcount.query.all()
     group_items = Invcount.query.group_by(
@@ -27,8 +27,13 @@ def count():
             itemname=form.itemname.data.itemname).first()
         filter_item = Invcount.query.filter(
             Invcount.itemname == form.itemname.data.itemname)
+
         previous_count = filter_item.order_by(
             Invcount.trans_date.desc()).first()
+        if previous_count is None:
+            total_purchase = 0
+        else:
+            total_count = previous_count.count_total
 
         purchase_item = Purchases.query.filter_by(
             itemname=form.itemname.data.itemname,
@@ -56,12 +61,11 @@ def count():
             eachcount=form.eachcount.data,
             count_total=(items_object.casepack *
                          form.casecount.data + form.eachcount.data),
-            previous_total=previous_count.count_total,
-            theory=(previous_count.count_total +
-                    total_purchase - total_sales),
+            previous_total=total_count,
+            theory=(total_count + total_purchase - total_sales),
             daily_variance=((items_object.casepack * form.casecount.data +
-                             form.eachcount.data) - (previous_count.count_total +
-                                                     total_purchase - total_sales)),
+                             form.eachcount.data) -
+                            (total_count + total_purchase - total_sales)),
             manager=current_user)
         db.session.add(inventory)
         db.session.commit()
@@ -128,12 +132,16 @@ def update_count(item_id):
         form.itemname.data = item.itemname
         form.casecount.data = item.casecount
         form.eachcount.data = item.eachcount
-    return render_template('counts/update_count.html', title='Update Item Count', form=form, inv_items=inv_items, item=item, legend='Update Count')
+    return render_template('counts/update_count.html',
+                           title='Update Item Count',
+                           form=form, inv_items=inv_items,
+                           item=item, legend='Update Count')
 
 
 @counts.route("/count/<int:item_id>/delete", methods=['POST'])
 @login_required
 def delete_count(item_id):
+    ''' Delete an item count '''
     item = Invcount.query.get_or_404(item_id)
     db.session.delete(item)
     db.session.commit()
@@ -144,6 +152,7 @@ def delete_count(item_id):
 @counts.route("/purchases/", methods=['GET', 'POST'])
 @login_required
 def purchases():
+    ''' Enter new purchases '''
     page = request.args.get('page', 1, type=int)
     purchase_items = Purchases.query.all()
     group_purchases = Purchases.query.group_by(Purchases.trans_date)
@@ -163,7 +172,9 @@ def purchases():
         flash(
             f'Purchases submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
         return redirect(url_for('counts.purchases'))
-    return render_template('counts/purchases.html', title='Purchases', form=form, purchase_items=purchase_items, ordered_purchases=ordered_purchases)
+    return render_template('counts/purchases.html', title='Purchases',
+                           form=form, purchase_items=purchase_items,
+                           ordered_purchases=ordered_purchases)
 
 
 @counts.route("/purchases/<int:item_id>/update", methods=['GET', 'POST'])
@@ -186,7 +197,10 @@ def update_purchases(item_id):
         form.transdate.data = item.trans_date
         form.itemname.data = item.itemname
         form.casecount.data = item.casecount
-    return render_template('counts/update_purchases.html', title='Update Item Purchases', form=form, inv_items=inv_items, item=item, legend='Update Purchases')
+    return render_template('counts/update_purchases.html',
+                           title='Update Item Purchases',
+                           form=form, inv_items=inv_items,
+                           item=item, legend='Update Purchases')
 
 
 @counts.route("/purchases/<int:item_id>/delete", methods=['POST'])
@@ -202,6 +216,7 @@ def delete_purchases(item_id):
 @counts.route("/sales/", methods=['GET', 'POST'])
 @login_required
 def sales():
+    ''' Enter new sales for item '''
     page = request.args.get('page', 1, type=int)
     sales_items = Sales.query.all()
     group_sales = Sales.query.group_by(Sales.trans_date)
@@ -220,12 +235,15 @@ def sales():
         flash(
             f'Sales submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
         return redirect(url_for('counts.sales'))
-    return render_template('counts/sales.html', title='Sales', form=form, sales_items=sales_items, ordered_sales=ordered_sales)
+    return render_template('counts/sales.html', title='Sales',
+                           form=form, sales_items=sales_items,
+                           ordered_sales=ordered_sales)
 
 
 @counts.route("/sales/<int:item_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_sales(item_id):
+    ''' Update sales items '''
     item = Sales.query.get_or_404(item_id)
     inv_items = Sales.query.all()
     form = UpdateSalesForm()
@@ -243,12 +261,15 @@ def update_sales(item_id):
         form.itemname.data = item.itemname
         form.eachcount.data = item.eachcount
         form.waste.data = item.waste
-    return render_template('counts/update_sales.html', title='Update Item Sales', form=form, inv_items=inv_items, item=item, legend='Update Sales')
+    return render_template('counts/update_sales.html', title='Update Item Sales',
+                           form=form, inv_items=inv_items,
+                           item=item, legend='Update Sales')
 
 
 @counts.route("/sales/<int:item_id>/delete", methods=['POST'])
 @login_required
 def delete_sales(item_id):
+    ''' Delete sales items '''
     item = Sales.query.get_or_404(item_id)
     db.session.delete(item)
     db.session.commit()
@@ -259,6 +280,7 @@ def delete_sales(item_id):
 @counts.route("/item/new", methods=['GET', 'POST'])
 @login_required
 def new_item():
+    ''' Create new inventory items '''
     inv_items = Items.query.all()
     form = NewItemForm()
     if form.validate_on_submit():
@@ -268,12 +290,15 @@ def new_item():
         db.session.commit()
         flash(f'New item created for {form.itemname.data}!', 'success')
         return redirect(url_for('counts.new_item'))
-    return render_template('counts/new_item.html', title='New Inventory Item', form=form, inv_items=inv_items, legend='Enter New Item')
+    return render_template('counts/new_item.html', title='New Inventory Item',
+                           form=form, inv_items=inv_items,
+                           legend='Enter New Item')
 
 
 @counts.route("/item/<int:item_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_item(item_id):
+    ''' Update current inventory items '''
     item = Items.query.get_or_404(item_id)
     inv_items = Items.query.all()
     form = NewItemForm()
@@ -286,12 +311,16 @@ def update_item(item_id):
     elif request.method == 'GET':
         form.itemname.data = item.itemname
         form.casepack.data = item.casepack
-    return render_template('counts/update_item.html', title='Update Inventory Item', form=form, inv_items=inv_items, item=item, legend='Update Item')
+    return render_template('counts/update_item.html',
+                           title='Update Inventory Item',
+                           form=form, inv_items=inv_items,
+                           item=item, legend='Update Item')
 
 
 @counts.route("/item/<int:item_id>/delete", methods=['POST'])
 @login_required
 def delete_item(item_id):
+    ''' Delete current items '''
     item = Items.query.get_or_404(item_id)
     db.session.delete(item)
     db.session.commit()
