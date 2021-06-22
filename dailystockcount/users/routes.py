@@ -7,7 +7,8 @@ from dailystockcount.models import User
 from dailystockcount.users.forms import (RegistrationFrom,
                                          LoginForm,
                                          UpdateAccountForm,
-                                         RequestResetForm)
+                                         RequestResetForm,
+                                         ResetPasswordForm)
 from dailystockcount.users.utils import save_picture, send_reset_email
 
 users = Blueprint('users', __name__)
@@ -35,7 +36,7 @@ def register():
 def login():
     ''' route for login.html '''
     if current_user.is_authenticated:
-        return redirect(url_for('counts.account'))
+        return redirect(url_for('users.account'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -73,8 +74,8 @@ def account():
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
-    image_file = url_for(
-        'static', filename='profile_pics/' + current_user.image_file)
+        image_file = url_for(
+            'static', filename='profile_pics/' + current_user.image_file)
     return render_template('users/account.html', title='Account', image_file=image_file, form=form)
 
 
