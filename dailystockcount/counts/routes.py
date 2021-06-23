@@ -20,7 +20,7 @@ def count():
     group_items = Invcount.query.group_by(
         Invcount.trans_date, Invcount.count_time)
     ordered_items = group_items.order_by(
-        Invcount.trans_date.desc(), Invcount.count_time.desc()).paginate(page=page, per_page=10)
+        Invcount.trans_date.desc(), Invcount.count_time.desc()).paginate(page=page, per_page=6)
     form = EnterCountForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
@@ -31,7 +31,7 @@ def count():
         previous_count = filter_item.order_by(
             Invcount.trans_date.desc()).first()
         if previous_count is None:
-            total_purchase = 0
+            total_count = 0
         else:
             total_count = previous_count.count_total
 
@@ -324,5 +324,5 @@ def delete_item(item_id):
     item = Items.query.get_or_404(item_id)
     db.session.delete(item)
     db.session.commit()
-    flash('Product has been deleted!', 'success')
+    flash("Product has been 86'd!", 'success')
     return redirect(url_for('counts.new_item'))

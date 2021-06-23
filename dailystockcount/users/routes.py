@@ -29,7 +29,9 @@ def register():
         db.session.commit()
         flash('Account has been created! You are now able to log in', 'success')
         return redirect(url_for('users.login'))
-    return render_template('users/register.html', title='Add New User', form=form, user_list=user_list)
+    return render_template('users/register.html',
+                           title='Add New User',
+                           form=form, user_list=user_list)
 
 
 @users.route("/login/", methods=['GET', 'POST'])
@@ -65,7 +67,6 @@ def account():
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
             current_user.image_file = picture_file
-
         current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
@@ -83,6 +84,7 @@ def account():
 def reset_request():
     ''' route for reset_password.html '''
     if current_user.is_authenticated:
+        flash('You must be logged out to reset your password', 'info')
         return redirect(url_for('users.account'))
     form = RequestResetForm()
     if form.validate_on_submit():

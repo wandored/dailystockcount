@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+{% block content %}
+{% for item in ordered_items %}
+<div class="content-section">
+  <legend class="border-bottom mb-2">{{ item.itemname }}</legend>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Current</th>
+        <th scope="col">Weekly Average</th>
+        <th scope="col">Monthly Average</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ item.count_total }}</td>
+      </tr>
+      <tr>
+        <td>{{ item.daily_variance }}</td>
+      </tr>
+      <tr>
+        <td>{{ item.waste }}</td>
+      </tr>
+      <tr>
+        <td>{{ item.sales_total }}</td>
+      </tr>
+      <tr>
+        <td>{{ item.purchase_total }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+{% endblock content %}

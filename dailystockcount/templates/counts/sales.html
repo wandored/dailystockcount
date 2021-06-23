@@ -62,9 +62,11 @@
             {{ form.submit(class="btn btn-primary") }}
         </div>
     </div>
+<!-- Count Section -->
+<section id="counts" class="p-1 bg-steel">
     {% for group in ordered_sales.items %}
         <div class="content-section">
-          <legend class="border-bottom mb-6">{{ group.trans_date.strftime('%m-%d-%y') }}</legend>
+          <legend class="border-bottom mb-6">{{ group.trans_date }}</legend>
           {% for item in sales_items%}
             {% if item.trans_date == group.trans_date  %}
               <div class="media-body">
@@ -75,6 +77,7 @@
           {% endfor %}
         </div>
     {% endfor %}
+</section>
 {% for page_num in ordered_sales.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
   {% if page_num %}
     {%if ordered_sales.page == page_num %}
