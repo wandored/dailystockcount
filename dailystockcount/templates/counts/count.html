@@ -76,6 +76,9 @@
         </div>
     </form>
 </div>
+
+<!-- Count Section -->
+<section id="counts" class="p-1 bg-steel">
 {% for group in ordered_items.items %}
   <div class="content-section">
     <legend class="border-bottom mb-6">{{ group.trans_date }} - {{ group.count_time }} - {{ group.manager.username }}</legend>
@@ -89,6 +92,7 @@
     {% endfor %}
   </div>
 {% endfor %}
+</section>
 <div>
     {{ purchase_item }}
     {{ sales_item }}
@@ -105,4 +109,5 @@
     ...
   {% endif %}
 {% endfor %}
+
 {% endblock content %}
