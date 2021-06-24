@@ -1,26 +1,26 @@
 {% extends 'layout.html' %}
 {% block content %}
     <!-- Alerts -->
-<section class="p-5">
+<section class="p-3">
     <div class="container">
           {% for item in ordered_items %}
             {% if item.trans_date == date_time.trans_date and item.count_time == date_time.count_time %}
               {% if item.daily_variance < 0 %}
                 <div class="alert alert-danger" role="alert">
-                  <h4 class="alert-heading">{{ item.itemname }}</h4>
-                  <p>You have a variance of {{ item.daily_variance }} since your last count.</p>
+                  <h4 class="alert-heading">{{ item.itemname }} {{ item.daily_variance }}</h4>
+                  <p>You have a negative variance. You should recount the steaks as well as review the details by clicking the link below</p>
                   <a href="{{ url_for('main.report_details', item_name=item.itemname) }}" class="alert-link">Click here for more details</a>
                 </div>
               {% elif item.daily_variance > 0 %}
                 <div class="alert alert-warning" role="alert">
-                  <h4 class="alert-heading">{{ item.itemname }}</h4>
-                  <p>You have a positive variance of {{ item.daily_variance }} Make sure you have entered sales correctly.</p>
+                  <h4 class="alert-heading">{{ item.itemname }} {{ item.daily_variance }}</h4>
+                  <p>You have a positive variance, Double check your counts and purchases.  You may also need to enter sales. Click the link below to investigate further</p>
                   <p><a href="{{ url_for('main.report_details', item_name=item.itemname) }}" class="alert-link">Click here for more details</a></p>
                 </div>
               {% elif item.daily_variance == 0 %}
                 <div class="alert alert-success" role="alert">
-                  <h4 class="alert-heading">{{ item.itemname }}</h4>
-                  <p>You have a variance of {{ item.daily_variance }} Great Work!</p>
+                  <h4 class="alert-heading">{{ item.itemname }} {{ item.daily_variance }}</h4>
+                  <p>No variance. Great Work!</p>
                   <p><a href="{{ url_for('main.report_details', item_name=item.itemname) }}" class="alert-link">Click here for more details</a></p>
                 </div>
               {% endif %}

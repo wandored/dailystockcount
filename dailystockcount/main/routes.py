@@ -38,4 +38,5 @@ def report_details(item_name):
 
     return render_template('main/details.html', title='Item Variance Details',
                            ordered_items=ordered_items,
-                           items_list=items_list)
+                           items_list=items_list,
+                           item_name=item_name)

@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div class="content-section">
+<div class="content-section">
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         <fieldset id="" class="form-group mb-2">
@@ -64,7 +64,8 @@
           {% endfor %}
         </div>
     {% endfor %}
-</section>
+</section>
+<!-- Page Numbering -->
 {% for page_num in ordered_purchases.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
   {% if page_num %}
   {%if ordered_purchases.page == page_num %}

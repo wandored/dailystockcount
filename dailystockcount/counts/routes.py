@@ -157,7 +157,7 @@ def purchases():
     purchase_items = Purchases.query.all()
     group_purchases = Purchases.query.group_by(Purchases.trans_date)
     ordered_purchases = group_purchases.order_by(
-        Purchases.trans_date.desc()).paginate(page=page, per_page=10)
+        Purchases.trans_date.desc()).paginate(page=page, per_page=6)
     form = EnterPurchasesForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
@@ -221,7 +221,7 @@ def sales():
     sales_items = Sales.query.all()
     group_sales = Sales.query.group_by(Sales.trans_date)
     ordered_sales = group_sales.order_by(
-        Sales.trans_date.desc()).paginate(page=page, per_page=10)
+        Sales.trans_date.desc()).paginate(page=page, per_page=6)
     form = EnterSalesForm()
     if form.validate_on_submit():
         sale = Sales(trans_date=form.transdate.data,
