@@ -7,12 +7,12 @@ from dailystockcount.models import User
 
 
 class RegistrationFrom(FlaskForm):
-    username = StringField('Username', validators=[
+    username = StringField('Username ', validators=[
                            DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[
-                                     DataRequired(), EqualTo('password')])
+    email = StringField('Email ', validators=[DataRequired(), Email()])
+    password = PasswordField('Password ', validators=[DataRequired()])
+#    confirm_password = PasswordField('Confirm Password', validators=[
+#                                     DataRequired(), EqualTo('password')])
     submit = SubmitField('Submit')
 
     def validate_username(self, username):
@@ -25,7 +25,7 @@ class RegistrationFrom(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError(
-                'Email is unavailable. Please choose another.')
+                'This email is already registered!')
 
 
 class LoginForm(FlaskForm):
