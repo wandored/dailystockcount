@@ -4,6 +4,7 @@ from flask import (render_template, url_for, flash,
 from flask_login import current_user, login_required
 from dailystockcount import db
 from dailystockcount.models import Invcount, Purchases, Sales, Items
+from dailystockcount.counts.utils import calculate_totals
 from dailystockcount.counts.forms import (EnterCountForm, UpdateCountForm, EnterSalesForm,
                                           UpdateSalesForm, EnterPurchasesForm,
                                           UpdatePurchasesForm, NewItemForm)
@@ -31,9 +32,9 @@ def count():
         previous_count = filter_item.order_by(
             Invcount.trans_date.desc()).first()
         if previous_count is None:
-            total_count = 0
+            total_previous = 0
         else:
-            total_count = previous_count.count_total
+            total_previous = previous_count.count_total
 
         purchase_item = Purchases.query.filter_by(
             itemname=form.itemname.data.itemname,
@@ -61,11 +62,11 @@ def count():
             eachcount=form.eachcount.data,
             count_total=(items_object.casepack *
                          form.casecount.data + form.eachcount.data),
-            previous_total=total_count,
-            theory=(total_count + total_purchase - total_sales),
+            previous_total=total_previous,
+            theory=(total_previous + total_purchase - total_sales),
             daily_variance=((items_object.casepack * form.casecount.data +
                              form.eachcount.data) -
-                            (total_count + total_purchase - total_sales)),
+                            (total_previous + total_purchase - total_sales)),
             manager=current_user)
         db.session.add(inventory)
         db.session.commit()
@@ -95,6 +96,10 @@ def update_count(item_id):
             Invcount.trans_date <= form.transdate.data)
         ordered_count = filter_item.order_by(
             Invcount.trans_date.desc(), Invcount.count_time.desc()).offset(1).first()
+        if ordered_count is None:
+            total_previous = 0
+        else:
+            total_previous = ordered_count.count_total
 
         purchase_item = Purchases.query.filter_by(
             itemname=form.itemname.data, trans_date=form.transdate.data).first()
@@ -117,12 +122,11 @@ def update_count(item_id):
         item.eachcount = form.eachcount.data
         item.count_total = (items_object.casepack *
                             form.casecount.data + form.eachcount.data)
-        item.previous_total = ordered_count.count_total
-        item.theory = (ordered_count.count_total +
-                       total_purchase - total_sales)
+        item.previous_total = total_previous
+        item.theory = (total_previous + total_purchase - total_sales)
         item.daily_variance = ((items_object.casepack * form.casecount.data +
-                                form.eachcount.data) - (ordered_count.count_total +
-                                                        total_purchase - total_sales))
+                                form.eachcount.data) -
+                               (total_previous + total_purchase - total_sales))
         db.session.commit()
         flash('Item counts have been updated!', 'success')
         return redirect(url_for('counts.count'))
@@ -171,6 +175,7 @@ def purchases():
         db.session.commit()
         flash(
             f'Purchases submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
+        calculate_totals(items_object.id)
         return redirect(url_for('counts.purchases'))
     return render_template('counts/purchases.html', title='Purchases',
                            form=form, purchase_items=purchase_items,
@@ -192,6 +197,7 @@ def update_purchases(item_id):
         item.purchase_total = (items_object.casepack * form.casecount.data)
         db.session.commit()
         flash('Item purchases have been updated!', 'success')
+        calculate_totals(items_object.id)
         return redirect(url_for('counts.purchases'))
     elif request.method == 'GET':
         form.transdate.data = item.trans_date
@@ -207,9 +213,12 @@ def update_purchases(item_id):
 @login_required
 def delete_purchases(item_id):
     item = Purchases.query.get_or_404(item_id)
+    unit = Items.query.filter_by(
+        itemname=item.itemname).first()
     db.session.delete(item)
     db.session.commit()
     flash('Item purchases have been deleted!', 'success')
+    calculate_totals(unit.id)
     return redirect(url_for('counts.purchases'))
 
 
@@ -224,6 +233,8 @@ def sales():
         Sales.trans_date.desc()).paginate(page=page, per_page=6)
     form = EnterSalesForm()
     if form.validate_on_submit():
+        unit = Items.query.filter_by(
+            itemname=form.itemname.data.itemname).first()
         sale = Sales(trans_date=form.transdate.data,
                      count_time='PM',
                      itemname=form.itemname.data.itemname,
@@ -234,6 +245,7 @@ def sales():
         db.session.commit()
         flash(
             f'Sales submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
+        calculate_totals(unit.id)
         return redirect(url_for('counts.sales'))
     return render_template('counts/sales.html', title='Sales',
                            form=form, sales_items=sales_items,
@@ -248,6 +260,8 @@ def update_sales(item_id):
     inv_items = Sales.query.all()
     form = UpdateSalesForm()
     if form.validate_on_submit():
+        unit = Items.query.filter_by(
+            itemname=form.itemname.data).first()
         item.trans_date = form.transdate.data
         item.itemname = form.itemname.data
         item.eachcount = form.eachcount.data
@@ -255,6 +269,7 @@ def update_sales(item_id):
         item.sales_total = (form.eachcount.data + form.waste.data)
         db.session.commit()
         flash('Item Sales have been updated!', 'success')
+        calculate_totals(unit.id)
         return redirect(url_for('counts.sales'))
     elif request.method == 'GET':
         form.transdate.data = item.trans_date
@@ -271,9 +286,12 @@ def update_sales(item_id):
 def delete_sales(item_id):
     ''' Delete sales items '''
     item = Sales.query.get_or_404(item_id)
+    unit = Items.query.filter_by(
+        itemname=item.itemname).first()
     db.session.delete(item)
     db.session.commit()
     flash('Item Sales have been deleted!', 'success')
+    calculate_totals(unit.id)
     return redirect(url_for('counts.sales'))
 
 

@@ -27,7 +27,9 @@ def register():
                     email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        flash('Account has been created! You are now able to log in', 'success')
+        user = User.query.filter_by(email=form.email.data).first()
+        send_reset_email(user)
+        flash('Account has been created, An email has been sent with instructions to reset password!', 'success')
         return redirect(url_for('users.login'))
     return render_template('users/register.html',
                            title='Add New User',
@@ -78,6 +80,20 @@ def account():
         image_file = url_for(
             'static', filename='profile_pics/' + current_user.image_file)
     return render_template('users/account.html', title='Account', image_file=image_file, form=form)
+
+
+@users.route("/user/<int:user_id>/delete", methods=['GET', 'POST'])
+@login_required
+def delete_user(user_id):
+    ''' Delete a user '''
+    form = RegistrationFrom()
+    user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        db.session.delete(user)
+        db.session.commit()
+        flash('User has been deleted', 'success')
+        return redirect(url_for('users.register'))
+    return render_template('users/delete_user.html', title='Add New User', form=form, user=user)
 
 
 @users.route("/reset_password", methods=['GET', 'POST'])

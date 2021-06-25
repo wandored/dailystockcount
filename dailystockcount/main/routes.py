@@ -1,5 +1,7 @@
 ''' main/routes.py is the main flask routes page '''
 from flask import render_template, Blueprint
+from flask_login import login_required
+#from sqlalchemy.sql import func
 from dailystockcount.models import Items, Invcount
 
 
@@ -13,6 +15,7 @@ def home():
 
 @main.route("/")
 @main.route("/report/", methods=['GET', 'POST'])
+@login_required
 def report():
     ''' route for reports.html '''
     item_names = [item.itemname for item in Items.query.all()]
@@ -30,11 +33,15 @@ def report():
 
 
 @main.route("/report/<item_name>/details", methods=['GET', 'POST'])
+@login_required
 def report_details(item_name):
     ''' display item details '''
     items_list = Invcount.query.filter(Invcount.itemname == item_name)
     ordered_items = items_list.order_by(
-        Invcount.trans_date.desc(), Invcount.count_time.desc()).all()
+        Invcount.trans_date.desc(), Invcount.count_time.desc()).limit(7)
+
+#    qry = session.query(func.avg(Sales.sales_total).label("avg_sales"),
+#                        func.avg(Purchases.purchase_total), label("avg_purchase"))
 
     return render_template('main/details.html', title='Item Variance Details',
                            ordered_items=ordered_items,
