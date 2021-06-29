@@ -7,11 +7,12 @@
     <thead>
       <tr>
         <th scope="col">Date</th>
-        <th scope="col">Begin Count</th>
+        <th scope="col">Begin</th>
         <th scope="col">Purchases</th>
         <th scope="col">Sales</th>
         <th scope="col">Waste</th>
-        <th scope="col">End Count</th>
+        <th scope="col">Theory</th>
+        <th scope="col">Count</th>
         <th scope="col">Variance</th>
       </tr>
     </thead>
@@ -21,10 +22,11 @@
             <td>{{ c.trans_date }} {{ c.count_time }}</td>
             <td>{{ c.previous_total }}</td>
             <td> + {{ p.purchase_total }}</td>
-            <td> - {{ s.sales_total }}</td>
+            <td> - {{ s.eachcount }}</td>
             <td> - {{ s.waste }}</td>
-            <td> = {{ c.count_total }}</td>
-            <td>{{ c.daily_variance }}</td>
+            <td> = {{ c.theory }}</td>
+            <td> - {{ c.count_total }}</td>
+            <td> = {{ c.daily_variance }}</td>
           </tr>
       {% endfor %}
     </tbody>
