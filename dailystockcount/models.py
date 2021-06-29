@@ -52,10 +52,28 @@ class User(db.Model, UserMixin):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
 
 
+# transaction = db.Table('counts',
+#                       db.Column('item_id', db.Integer,
+#                                 db.ForeignKey('items.id')),
+#                       db.Column('Invcount', db.Integer,
+#                                 db.ForeignKey('invcount.id')),
+#                       db.Column('Purchases', db.Integer,
+#                                 db.ForeignKey('purchases.id')),
+#                       db.Column('Sales', db.Integer,
+#                                 db.ForeignKey('sales.id'))
+#                       )
+
+
 class Items(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     itemname = db.Column(db.String(), nullable=False)
     casepack = db.Column(db.Integer)
+#    counts = db.relationship('Invcount', secondary=transaction,
+#                             backref=db.backref('count', lazy='dynamic'))
+#    purchases = db.relationship('Purchases', secondary=transaction,
+#                                backref=db.backref('buy', lazy='dynamic'))
+#    sales = db.relationship('Sales', secondary=transaction,
+#                            backref=db.backref('sell', lazy='dynamic'))
 
     def __repr__(self):
         return f"Items('{self.id}', '{self.itemname}', '{self.casepack}')"
@@ -89,7 +107,7 @@ class Purchases(db.Model):
     purchase_total = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
-        return f"Purchases('{self.trans_date}', '{self.itemname}', '{self.casepack}', '{self.casecount}', '{self.purchase_total}')"
+        return f"Purchases('{self.trans_date}', '{self.itemname}', '{self.count_time}', '{self.casecount}', '{self.purchase_total}')"
 
 
 class Sales(db.Model):
@@ -112,7 +130,10 @@ class Totals(db.Model):
                            default=datetime.utcnow)
     count_time = db.Column(db.String(), nullable=False)
     itemname = db.Column(db.String(), nullable=False)
-    previous_total = db.Column(db.Integer, unique=False)
+    begin_count = db.Column(db.Integer, unique=False)
+    purchase_total = db.Column(db.Integer, nullable=False)
+    sales_total = db.Column(db.Integer, nullable=False)
+    waste = db.Column(db.Integer)
     onhand = db.Column(db.Integer, nullable=False)
     theory = db.Column(db.Integer, nullable=False)
     daily_variance = db.Column(db.Integer, nullable=False)

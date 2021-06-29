@@ -1,8 +1,9 @@
 ''' main/routes.py is the main flask routes page '''
 from flask import render_template, Blueprint
 from flask_login import login_required
-#from sqlalchemy.sql import func
-from dailystockcount.models import Items, Invcount
+from sqlalchemy import or_
+from dailystockcount import db
+from dailystockcount.models import Items, Invcount, Sales, Purchases
 
 
 main = Blueprint('main', __name__)
@@ -36,14 +37,21 @@ def report():
 @login_required
 def report_details(item_name):
     ''' display item details '''
-    items_list = Invcount.query.filter(Invcount.itemname == item_name)
-    ordered_items = items_list.order_by(
+    items_list = Invcount.query.filter(Invcount.itemname == item_name).order_by(
         Invcount.trans_date.desc(), Invcount.count_time.desc()).limit(7)
+    sales_list = Sales.query.filter(Sales.itemname == item_name).order_by(
+        Sales.trans_date.desc(), Sales.count_time.desc()).limit(7)
+    purchase_list = Purchases.query.filter(Purchases.itemname == item_name).order_by(
+        Purchases.trans_date.desc(), Purchases.count_time.desc()).limit(7)
 
-#    qry = session.query(func.avg(Sales.sales_total).label("avg_sales"),
-#                        func.avg(Purchases.purchase_total), label("avg_purchase"))
+    result = db.session.query(Invcount, Purchases, Sales).select_from(Invcount).filter(Invcount.itemname == item_name). \
+        outerjoin(Purchases, Purchases.trans_date == Invcount.trans_date).filter(or_(Purchases.itemname == item_name, Purchases.itemname == None)). \
+        outerjoin(Sales, Sales.trans_date == Invcount.trans_date).filter(or_(Sales.itemname == item_name, Sales.itemname == None)). \
+        order_by(Invcount.trans_date.desc()).limit(7)
 
     return render_template('main/details.html', title='Item Variance Details',
-                           ordered_items=ordered_items,
                            items_list=items_list,
-                           item_name=item_name)
+                           sales_list=sales_list,
+                           purchase_list=purchase_list,
+                           item_name=item_name,
+                           result=result)
