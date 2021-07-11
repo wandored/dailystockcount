@@ -22,24 +22,25 @@ def save_picture(form_picture):
 
 
 def send_reset_email(user):
-    token = user.get_reset_token()
+    token = user.get_reset_token(expires_sec=1800)
     msg = Message('Password Reset Request',
-                  sender='noreply@dailystockcount.com',
                   recipients=[user.email])
     msg.body = f'''To reset your password, visit the following link:
+
 {url_for('users.reset_token', token=token, _external=True)}
 
-If you did not make this request then simply ignore this email and no changes will be made.
+If you did not make this request then simply ignore this email and no changes will be made. The link will expire in 30 minutes.
 '''
     mail.send(msg)
 
 
 def send_welcome_email(user):
+    token = user.get_reset_token(expires_sec=86400)
     msg = Message('Welcome to DailyStockCount.com',
-                  sender='noreply@dailystockcount.com',
                   recipients=[user.email])
-    msg.body = f'''You have been registered with DailyStockCount.com, you must reset your password before you can login. To do so visit the following link and select "Forgot Password":
-{url_for('users.login', _external=True)}
+    msg.body = f'''You have been registered with DailyStockCount.com, you must reset your password before you can login. To do so visit the following link:
+
+{url_for('users.reset_token', token=token, _external=True)}
 
 DailyStockCount.com is an app used for daily inventory of critical items.  If you feel you have received this email by mistake you may delete it.  The link will expire in 24 hours.
 '''

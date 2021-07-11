@@ -30,15 +30,16 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarMenu">
           <div class="navbar-nav ms-auto">
+            {% if current_user.is_authenticated %}
             <a class="nav-item nav-link" href="{{ url_for('counts.count') }}">Count</a>
             <a class="nav-item nav-link" href="{{ url_for('counts.purchases') }}">Purchases</a>
             <a class="nav-item nav-link" href="{{ url_for('counts.sales') }}">Sales</a>
             <a class="nav-item nav-link" href="{{ url_for('counts.new_item') }}">Items</a>
-            {% if current_user.is_authenticated %}
             <a class="nav-item nav-link" href="{{ url_for('main.report') }}">Reports</a>
             <a class="nav-item nav-link" href="{{ url_for('users.logout') }}">Logout</a>
             {% else %}
             <a class="nav-item nav-link" href="{{ url_for('users.login') }}">Login</a>
+            <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Info</a>
             {% endif %}
           </div>
         </div>
@@ -82,6 +83,15 @@
               <a class="btn btn-warning" href="{{ url_for('users.register') }}">Manage Users</a>
             </div>
           </div>
+          <div class="card bg-steel text-light">
+            <div class="card-body text-center">
+              <div class="h1 mb-1">
+                <i class="bi bi-info-circle"></i>
+              </div>
+              <a class="btn btn-warning" href="{{ url_for('main.home') }}">About</a>
+            </div>
+          </div>
+
         </div>
       </div>
       {% endif %}

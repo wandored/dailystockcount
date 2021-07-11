@@ -15,4 +15,4 @@ class Config:
     MAIL_USE_SSL = False
     MAIL_USERNAME = config.get('EMAIL_USER')
     MAIL_PASSWORD = config.get('EMAIL_PASS')
-    FLASK_ADMIN_SWATCH = 'cerulean'
+    MAIL_DEFAULT_SENDER = 'chefk@dailystockcount.com'

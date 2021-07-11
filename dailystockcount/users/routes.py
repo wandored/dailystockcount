@@ -2,17 +2,18 @@
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_admin.contrib.sqla import ModelView
-from dailystockcount import db, bcrypt, admin
+from RandomWordGenerator import RandomWord
+from dailystockcount import db, bcrypt
 from dailystockcount.models import User
 from dailystockcount.users.forms import (RegistrationFrom,
                                          LoginForm,
                                          UpdateAccountForm,
                                          RequestResetForm,
                                          ResetPasswordForm)
-from dailystockcount.users.utils import save_picture, send_reset_email
+from dailystockcount.users.utils import save_picture, send_reset_email, send_welcome_email
 
 users = Blueprint('users', __name__)
-admin.add_view(ModelView(User, db.session))
+# admin.add_view(ModelView(User, db.session))
 
 
 @users.route("/register/", methods=['GET', 'POST'])
@@ -21,16 +22,18 @@ def register():
     user_list = User.query.all()
     form = RegistrationFrom()
     if form.validate_on_submit():
+        rw = RandomWord(max_word_size=10)
         hashed_password = bcrypt.generate_password_hash(
-            form.password.data).decode('utf-8')
+            rw.generate()).decode('utf-8')
         user = User(username=form.username.data,
-                    email=form.email.data, password=hashed_password)
+                    email=form.email.data,
+                    password=hashed_password)
         db.session.add(user)
         db.session.commit()
         user = User.query.filter_by(email=form.email.data).first()
-        send_reset_email(user)
-        flash('Account has been created, An email has been sent with instructions to reset password!', 'success')
-        return redirect(url_for('users.login'))
+        send_welcome_email(user)
+        flash('Account has been created and an email has been sent with instructions to reset password!', 'success')
+        return redirect(url_for('users.register'))
     return render_template('users/register.html',
                            title='Add New User',
                            form=form, user_list=user_list)

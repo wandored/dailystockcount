@@ -14,22 +14,23 @@ def home():
     return render_template('main/home.html', title='Home')
 
 
+@main.route("/about/")
+def about():
+    return render_template('main/about.html', title='About')
+
+
 @main.route("/")
 @main.route("/report/", methods=['GET', 'POST'])
 @login_required
 def report():
     ''' route for reports.html '''
-    item_names = [item.itemname for item in Items.query.all()]
-    inv_items = Invcount.query.all()
-    ordered_items = Invcount.query.order_by(
+    ordered_counts = Invcount.query.order_by(
         Invcount.trans_date.desc(), Invcount.count_time.desc(), Invcount.daily_variance).all()
     date_time = Invcount.query.order_by(
         Invcount.trans_date.desc(), Invcount.count_time.desc()).first()
 
     return render_template('main/report.html', title='Variance-Daily',
-                           ordered_items=ordered_items,
-                           inv_items=inv_items,
-                           item_names=item_names,
+                           ordered_counts=ordered_counts,
                            date_time=date_time)
 
 
@@ -44,12 +45,12 @@ def report_details(item_name):
     purchase_list = Purchases.query.filter(Purchases.itemname == item_name).order_by(
         Purchases.trans_date.desc(), Purchases.count_time.desc()).limit(7)
 
-    result = db.session.query(Invcount, Purchases, Sales).select_from(Invcount). \
-        filter(Invcount.itemname == item_name). \
-        outerjoin(Purchases, Purchases.trans_date == Invcount.trans_date). \
-        filter(or_(Purchases.itemname == item_name, Purchases.itemname == None)). \
+    result = db.session.query(Invcount, Sales, Purchases).select_from(Invcount). \
+        filter(and_(Invcount.itemname == item_name, Invcount.count_time == "PM")). \
         outerjoin(Sales, Sales.trans_date == Invcount.trans_date). \
         filter(or_(Sales.itemname == item_name, Sales.itemname == None)). \
+        outerjoin(Purchases, Purchases.trans_date == Invcount.trans_date). \
+        filter(or_(Purchases.itemname == item_name, Purchases.itemname == None)). \
         order_by(Invcount.trans_date.desc(),
                  Invcount.count_time.desc()).limit(7)
 
