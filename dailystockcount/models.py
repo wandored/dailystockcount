@@ -3,7 +3,7 @@ from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from flask_login import UserMixin, current_user
-from flask_admin import AdminIndexView
+# from flask_admin import AdminIndexView
 from dailystockcount import db, login_manager
 
 
@@ -13,14 +13,14 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-class MyAdminView(AdminIndexView):
-    def is_accessable(self):
-        ''' checks if current user is authenticated '''
-        return (current_user.is_active and current_user.is_authenticated)
-
-    def not_auth(self):
-        ''' redirect to users.account '''
-        return redirect(url_for('users.account'))
+# class MyAdminView(AdminIndexView):
+#    def is_accessable(self):
+#        ''' checks if current user is authenticated '''
+#        return (current_user.is_active and current_user.is_authenticated)
+#
+#    def not_auth(self):
+#        ''' redirect to users.account '''
+#        return redirect(url_for('users.account'))
 
 
 class User(db.Model, UserMixin):
@@ -34,7 +34,7 @@ class User(db.Model, UserMixin):
     admin = db.Column(db.Integer, default=0)
     counts = db.relationship('Invcount', backref='manager', lazy=True)
 
-    def get_reset_token(self, expires_sec=1800):
+    def get_reset_token(self, expires_sec):
         ''' get password reset token for user '''
         s = Serializer(current_app.config['SECRET_KEY'], expires_sec)
         return s.dumps({'user_id': self.id}).decode('utf-8')
@@ -91,7 +91,7 @@ class Invcount(db.Model):
     previous_total = db.Column(db.Integer, nullable=False)
     theory = db.Column(db.Integer, nullable=False)
     daily_variance = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
     def __repr__(self):
         return f"Invcount('{self.trans_date}', '{self.count_time}', '{self.itemname}', '{self.casecount}', '{self.eachcount}', '{self.count_total}')"
@@ -124,16 +124,16 @@ class Sales(db.Model):
         return f"Sales('{self.trans_date}', '{self.itemname}', '{self.eachcount}', '{self.waste}', '{self.sales_total}')"
 
 
-class Totals(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    trans_date = db.Column(db.Date, nullable=False,
-                           default=datetime.utcnow)
-    count_time = db.Column(db.String(), nullable=False)
-    itemname = db.Column(db.String(), nullable=False)
-    begin_count = db.Column(db.Integer, unique=False)
-    purchase_total = db.Column(db.Integer, nullable=False)
-    sales_total = db.Column(db.Integer, nullable=False)
-    waste = db.Column(db.Integer)
-    onhand = db.Column(db.Integer, nullable=False)
-    theory = db.Column(db.Integer, nullable=False)
-    daily_variance = db.Column(db.Integer, nullable=False)
+# class Totals(db.Model):
+#    id = db.Column(db.Integer, primary_key=True)
+#    trans_date = db.Column(db.Date, nullable=False,
+#                           default=datetime.utcnow)
+#    count_time = db.Column(db.String(), nullable=False)
+#    itemname = db.Column(db.String(), nullable=False)
+#    begin_count = db.Column(db.Integer, unique=False)
+#    purchase_total = db.Column(db.Integer, nullable=False)
+#    sales_total = db.Column(db.Integer, nullable=False)
+#    waste = db.Column(db.Integer)
+#    onhand = db.Column(db.Integer, nullable=False)
+#    theory = db.Column(db.Integer, nullable=False)
+#    daily_variance = db.Column(db.Integer, nullable=False)

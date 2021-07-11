@@ -2,8 +2,8 @@
 {% block content %}
 <!-- Table -->
 <div class="content-section">
-  <legend class="border-bottom mb-2">{{ item_name }}</legend>
-  <table class="table table-striped">
+  <legend class="border-bottom mb-1">{{ item_name }}</legend>
+  <table class="table table-sm table-hover table-borderedless">
     <thead>
       <tr>
         <th scope="col">Date</th>
@@ -17,7 +17,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for c, p, s in result %}
+      {% for c, s, p in result %}
           <tr>
             <td>{{ c.trans_date }} {{ c.count_time }}</td>
             <td>{{ c.previous_total }}</td>

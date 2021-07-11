@@ -30,15 +30,16 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarMenu">
           <div class="navbar-nav ms-auto">
+            {% if current_user.is_authenticated %}
             <a class="nav-item nav-link" href="{{ url_for('counts.count') }}">Count</a>
             <a class="nav-item nav-link" href="{{ url_for('counts.purchases') }}">Purchases</a>
             <a class="nav-item nav-link" href="{{ url_for('counts.sales') }}">Sales</a>
             <a class="nav-item nav-link" href="{{ url_for('counts.new_item') }}">Items</a>
-            {% if current_user.is_authenticated %}
             <a class="nav-item nav-link" href="{{ url_for('main.report') }}">Reports</a>
             <a class="nav-item nav-link" href="{{ url_for('users.logout') }}">Logout</a>
             {% else %}
             <a class="nav-item nav-link" href="{{ url_for('users.login') }}">Login</a>
+            <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Info</a>
             {% endif %}
           </div>
         </div>
@@ -48,7 +49,7 @@
   <!-- Forms Section -->
   <main role="main" class="container">
     <div class="row">
-      <div class="col-sm-10">
+      <div class="col-sm-12">
         <div>
           {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -62,28 +63,6 @@
           {% block content %}{% endblock %}
         </div>
       </div>
-
-      <!-- Boxes
-      <div class="col-sm-4">
-        <div class="content-section">
-          <div class="card bg-secondary text-light">
-            <div class="card-body text-center">
-              <div class="h1 mb-1">
-                <i class="bi bi-person-square"></i>
-              </div>
-              <a class="btn btn-warning" href="#">Average Sales</a>
-            </div>
-          </div>
-          <div class="card bg-steel text-light">
-            <div class="card-body text-center">
-              <div class="h1 mb-1">
-                <i class="bi bi-people-fill"></i>
-              </div>
-              <a class="btn btn-warning" href="#">Average Waste</a>
-            </div>
-          </div>
-        </div>
-      </div> -->
   </main>
 
   <!-- Footer -->
