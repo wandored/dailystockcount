@@ -15,4 +15,4 @@ class Config:
     MAIL_USE_SSL = False
     MAIL_USERNAME = config.get('EMAIL_USER')
     MAIL_PASSWORD = config.get('EMAIL_PASS')
-    MAIL_DEFAULT_SENDER = 'chefk@dailystockcount.com'
+    MAIL_DEFAULT_SENDER = config.get('MAIL_DEFAULT_SENDER')
