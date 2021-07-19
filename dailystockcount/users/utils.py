@@ -27,8 +27,7 @@ def send_reset_email(user):
         'Password Reset Request',
         recipients=[user.email]
     )
-    current_app.config['SERVER_NAME'] = 'development.dailystockcount.com'
-    with current_app.test_request_context():
+    with current_app.app_context():
         url = url_for(
             'users.reset_token',
             _external=True,
@@ -48,8 +47,7 @@ def send_welcome_email(user):
         'Welcome to DailyStockCount.com',
         recipients=[user.email]
     )
-    current_app.config['SERVER_NAME'] = 'development.dailystockcount.com'
-    with current_app.test_request_context():
+    with current_app.app_context():
         url = url_for(
             'users.reset_token',
             _external=True,
