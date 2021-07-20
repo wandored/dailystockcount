@@ -27,12 +27,11 @@ def send_reset_email(user):
         'Password Reset Request',
         recipients=[user.email]
     )
-    with current_app.app_context():
-        url = url_for(
-            'users.reset_token',
-            _external=True,
-            token=token
-        )
+    url = url_for(
+        'users.reset_token',
+        _external=True,
+        token=token
+    )
     msg.html = render_template(
         'users/reset_email.html',
         url=url,
@@ -47,12 +46,11 @@ def send_welcome_email(user):
         'Welcome to DailyStockCount.com',
         recipients=[user.email]
     )
-    with current_app.app_context():
-        url = url_for(
-            'users.reset_token',
-            _external=True,
-            token=token
-        )
+    url = url_for(
+        'users.reset_token',
+        _external=True,
+        token=token
+    )
     msg.html = render_template(
         'users/register_email.html',
         url=url,

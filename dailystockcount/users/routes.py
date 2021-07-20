@@ -13,10 +13,10 @@ from dailystockcount.users.forms import (RegistrationFrom,
 from dailystockcount.users.utils import save_picture, send_reset_email, send_welcome_email
 
 users = Blueprint('users', __name__)
-# admin.add_view(ModelView(User, db.session))
 
 
 @users.route("/register/", methods=['GET', 'POST'])
+@login_required
 def register():
     ''' route for register.html '''
     user_list = User.query.all()
