@@ -3,7 +3,6 @@ from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from flask_login import UserMixin, current_user
-# from flask_admin import AdminIndexView
 from dailystockcount import db, login_manager
 
 
@@ -11,16 +10,6 @@ from dailystockcount import db, login_manager
 def load_user(user_id):
     ''' load user_id for user edits '''
     return User.query.get(int(user_id))
-
-
-# class MyAdminView(AdminIndexView):
-#    def is_accessable(self):
-#        ''' checks if current user is authenticated '''
-#        return (current_user.is_active and current_user.is_authenticated)
-#
-#    def not_auth(self):
-#        ''' redirect to users.account '''
-#        return redirect(url_for('users.account'))
 
 
 class User(db.Model, UserMixin):
@@ -52,28 +41,10 @@ class User(db.Model, UserMixin):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
 
 
-# transaction = db.Table('counts',
-#                       db.Column('item_id', db.Integer,
-#                                 db.ForeignKey('items.id')),
-#                       db.Column('Invcount', db.Integer,
-#                                 db.ForeignKey('invcount.id')),
-#                       db.Column('Purchases', db.Integer,
-#                                 db.ForeignKey('purchases.id')),
-#                       db.Column('Sales', db.Integer,
-#                                 db.ForeignKey('sales.id'))
-#                       )
-
-
 class Items(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     itemname = db.Column(db.String(), nullable=False)
     casepack = db.Column(db.Integer)
-#    counts = db.relationship('Invcount', secondary=transaction,
-#                             backref=db.backref('count', lazy='dynamic'))
-#    purchases = db.relationship('Purchases', secondary=transaction,
-#                                backref=db.backref('buy', lazy='dynamic'))
-#    sales = db.relationship('Sales', secondary=transaction,
-#                            backref=db.backref('sell', lazy='dynamic'))
 
     def __repr__(self):
         return f"Items('{self.id}', '{self.itemname}', '{self.casepack}')"
@@ -122,18 +93,3 @@ class Sales(db.Model):
 
     def __repr__(self):
         return f"Sales('{self.trans_date}', '{self.itemname}', '{self.eachcount}', '{self.waste}', '{self.sales_total}')"
-
-
-# class Totals(db.Model):
-#    id = db.Column(db.Integer, primary_key=True)
-#    trans_date = db.Column(db.Date, nullable=False,
-#                           default=datetime.utcnow)
-#    count_time = db.Column(db.String(), nullable=False)
-#    itemname = db.Column(db.String(), nullable=False)
-#    begin_count = db.Column(db.Integer, unique=False)
-#    purchase_total = db.Column(db.Integer, nullable=False)
-#    sales_total = db.Column(db.Integer, nullable=False)
-#    waste = db.Column(db.Integer)
-#    onhand = db.Column(db.Integer, nullable=False)
-#    theory = db.Column(db.Integer, nullable=False)
-#    daily_variance = db.Column(db.Integer, nullable=False)

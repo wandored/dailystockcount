@@ -21,7 +21,7 @@ def count():
     group_items = Invcount.query.group_by(
         Invcount.trans_date, Invcount.count_time)
     ordered_items = group_items.order_by(
-        Invcount.trans_date.desc(), Invcount.count_time.desc()).paginate(page=page, per_page=6)
+        Invcount.trans_date.desc(), Invcount.count_time.desc()).paginate(page=page, per_page=10)
     form = EnterCountForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
@@ -161,7 +161,7 @@ def purchases():
     purchase_items = Purchases.query.all()
     group_purchases = Purchases.query.group_by(Purchases.trans_date)
     ordered_purchases = group_purchases.order_by(
-        Purchases.trans_date.desc()).paginate(page=page, per_page=6)
+        Purchases.trans_date.desc()).paginate(page=page, per_page=10)
     form = EnterPurchasesForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
@@ -230,7 +230,7 @@ def sales():
     sales_items = Sales.query.all()
     group_sales = Sales.query.group_by(Sales.trans_date)
     ordered_sales = group_sales.order_by(
-        Sales.trans_date.desc()).paginate(page=page, per_page=6)
+        Sales.trans_date.desc()).paginate(page=page, per_page=10)
     form = EnterSalesForm()
     if form.validate_on_submit():
         unit = Items.query.filter_by(
