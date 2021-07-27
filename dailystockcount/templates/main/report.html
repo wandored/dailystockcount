@@ -3,6 +3,7 @@
     <!-- Alerts -->
 <section class="p-3">
     <div class="container">
+      <legend class="border-bottom mb-6">Count Date: {{ date_time.trans_date.strftime('%A-%m/%d') }}</legend>
           {% for count in ordered_counts %}
             {% if count.trans_date == date_time.trans_date and count.count_time == date_time.count_time %}
               {% if count.daily_variance < 0 %}

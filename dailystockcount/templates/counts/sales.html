@@ -66,7 +66,7 @@
 <section id="counts" class="p-1 bg-steel">
     {% for group in ordered_sales.items %}
         <div class="content-section">
-          <legend class="border-bottom mb-6">{{ group.trans_date }}</legend>
+          <legend class="border-bottom mb-6">{{ group.trans_date.strftime('%A-%m/%d') }}</legend>
           {% for item in sales_items%}
             {% if item.trans_date == group.trans_date  %}
               <div class="media-body">

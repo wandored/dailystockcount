@@ -35,6 +35,7 @@ def send_reset_email(user):
     msg.html = render_template(
         'users/reset_email.html',
         url=url,
+        email=user.email,
         username=user.username
     )
     mail.send(msg)
@@ -54,6 +55,7 @@ def send_welcome_email(user):
     msg.html = render_template(
         'users/register_email.html',
         url=url,
+        email=user.email,
         username=user.username
     )
     mail.send(msg)

@@ -48,12 +48,13 @@
         <div class="form-group mb-1">
             {{ form.submit(class="btn btn-primary") }}
         </div>
+        <p>On days when products are purchased, it is necessary to enter 0 for items NOT purchased</p>
     </div>
 <!-- Count Section -->
 <section id="counts" class="p-1 bg-steel">
     {% for group in ordered_purchases.items %}
         <div class="content-section">
-          <legend class="border-bottom mb-6">{{ group.trans_date }}</legend>
+          <legend class="border-bottom mb-6">{{ group.trans_date.strftime('%A-%m/%d') }}</legend>
           {% for item in purchase_items%}
             {% if item.trans_date == group.trans_date  %}
               <div class="media-body">
