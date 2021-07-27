@@ -43,7 +43,7 @@ class EnterPurchasesForm(FlaskForm):
     am_pm = HiddenField('PM')
     itemname = QuerySelectField('Item Name: ',
                                 query_factory=item_query, allow_blank=True, get_label='itemname')
-    casecount = IntegerField('Cases Purchased: ')
+    casecount = IntegerField('Cases Purchased: ', default=0)
     submit = SubmitField('Submit!')
 
 
