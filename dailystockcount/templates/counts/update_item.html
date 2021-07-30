@@ -4,7 +4,7 @@
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         <fieldset id="" class="form-group">
-          <legend class="border-bottom mb-4">{{ legend }}</legend>
+          <legend class="border-bottom mb-4">{{ legend }}{{ item.itemname }}</legend>
             <div class="form-group">
                 {{ form.itemname.label(class="form=control-label") }}
                 {% if form.itemname.errors %}

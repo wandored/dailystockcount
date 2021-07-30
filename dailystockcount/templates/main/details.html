@@ -20,13 +20,17 @@
             </tr>
           </thead>
           <tbody>
-            {% for c, s, p in result %}
+            {% for c, s, w, p in result %}
                 <tr>
                   <td>{{ c.trans_date.strftime('%A-%m/%d') }}</td>
                   <td>{{ c.previous_total }}</td>
-                  <td> + {{ p.purchase_total }}</td>
-                  <td> - {{ s.eachcount }}</td>
-                  <td> - {{ s.waste }}</td>
+                  {% if p %}
+                    <td> + {{ p }}</td>
+                  {% else %}
+                    <td> + 0</td>
+                  {% endif %}
+                  <td> - {{ s }}</td>
+                  <td> - {{ w }}</td>
                   <td> = {{ c.theory }}</td>
                   <td> - {{ c.count_total }}</td>
                   <td> = {{ c.daily_variance }}</td>

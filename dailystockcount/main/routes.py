@@ -1,5 +1,5 @@
 ''' main/routes.py is the main flask routes page '''
-from flask import render_template, Blueprint
+from flask import render_template, Blueprint, redirect, url_for
 from flask_login import login_required
 from sqlalchemy import or_, and_, func
 from dailystockcount import db
@@ -27,6 +27,9 @@ def report():
     date_time = Invcount.query.order_by(
         Invcount.trans_date.desc(),
         Invcount.count_time.desc()).first()
+
+    if not ordered_counts:
+        return redirect(url_for('counts.new_item'))
 
     return render_template('main/report.html',
                            title='Variance-Daily',
@@ -85,14 +88,27 @@ def report_details(item_name):
         day_sales.append(i.sales_total)
 
     # Weekly Details Table
-    result = db.session.query(Invcount, Sales, Purchases).select_from(Invcount). \
-        filter(and_(Invcount.itemname == item_name, Invcount.count_time == "PM", Invcount.trans_date >= weekly)). \
-        outerjoin(Sales, Sales.trans_date == Invcount.trans_date). \
-        filter(or_(Sales.itemname == item_name, Sales.itemname == None)). \
-        outerjoin(Purchases, Purchases.trans_date == Invcount.trans_date). \
-        filter(or_(Purchases.itemname == item_name, Purchases.itemname == None)). \
-        order_by(Invcount.trans_date.desc()).all()
+    result = db.session.query(Invcount, func.sum(Sales.eachcount).label('sales_count'),
+                              func.sum(Sales.waste).label('sales_waste'),
+                              func.sum(Purchases.purchase_total).label('purchase_count')).select_from(Invcount). \
+        outerjoin(Sales, and_(Sales.trans_date == Invcount.trans_date,
+                              Sales.itemname == item_name)). \
+        outerjoin(Purchases, and_(Purchases.trans_date == Invcount.trans_date,
+                                  Purchases.itemname == item_name)). \
+        group_by(Invcount.itemname,
+                 Invcount.trans_date). \
+        order_by(Invcount.trans_date.desc()). \
+        filter(Invcount.itemname == item_name,
+               Invcount.count_time ==
+               "PM", Invcount.trans_date >= weekly)
 
+#    result = db.session.query(Invcount, Sales, Purchases).select_from(Invcount). \
+#        filter(and_(Invcount.itemname == item_name, Invcount.count_time == "PM", Invcount.trans_date >= weekly)). \
+#        outerjoin(Sales, Sales.trans_date == Invcount.trans_date). \
+#        filter(or_(Sales.itemname == item_name, Sales.itemname == None)). \
+#        outerjoin(Purchases, Purchases.trans_date == Invcount.trans_date). \
+#        filter(or_(Purchases.itemname == item_name, Purchases.itemname == None)). \
+#        order_by(Invcount.trans_date.desc()).all()
     return render_template('main/details.html',
                            title='Item Variance Details',
                            wkly_on_hand=wkly_on_hand,
