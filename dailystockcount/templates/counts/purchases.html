@@ -41,14 +41,13 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                {{ form.casecount(class="form=control form-control-md") }}
+                    {{ form.casecount(class="form=control form-control-md") }}
                 {% endif %}
             </div>
         </fieldset>
         <div class="form-group mb-1">
             {{ form.submit(class="btn btn-primary") }}
         </div>
-        <p>On days when products are purchased, it is necessary to enter 0 for items NOT purchased</p>
     </div>
 <!-- Count Section -->
 <section id="counts" class="p-1 bg-steel">

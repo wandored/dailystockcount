@@ -1,13 +1,17 @@
 ''' count/routes.py is flask routes for counts, purchases, sales and items. '''
-from flask import (render_template, url_for, flash,
-                   redirect, request, Blueprint)
+from flask import (render_template,
+                   url_for,
+                   flash,
+                   redirect,
+                   request,
+                   Blueprint)
 from flask_login import current_user, login_required
 from dailystockcount import db
 from dailystockcount.models import Invcount, Purchases, Sales, Items
 from dailystockcount.counts.utils import calculate_totals
 from dailystockcount.counts.forms import (EnterCountForm, UpdateCountForm, EnterSalesForm,
                                           UpdateSalesForm, EnterPurchasesForm,
-                                          UpdatePurchasesForm, NewItemForm)
+                                          UpdatePurchasesForm, NewItemForm, UpdateItemForm)
 
 counts = Blueprint('counts', __name__)
 
@@ -157,11 +161,16 @@ def delete_count(item_id):
 @login_required
 def purchases():
     ''' Enter new purchases '''
-    page = request.args.get('page', 1, type=int)
     purchase_items = Purchases.query.all()
+    inv_items = Items.query.all()
+    item_number = Items.query.count()
+
+    # Pagination
+    page = request.args.get('page', 1, type=int)
     group_purchases = Purchases.query.group_by(Purchases.trans_date)
     ordered_purchases = group_purchases.order_by(
         Purchases.trans_date.desc()).paginate(page=page, per_page=10)
+
     form = EnterPurchasesForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
@@ -179,6 +188,7 @@ def purchases():
         return redirect(url_for('counts.purchases'))
     return render_template('counts/purchases.html', title='Purchases',
                            form=form, purchase_items=purchase_items,
+                           inv_items=inv_items,
                            ordered_purchases=ordered_purchases)
 
 
@@ -319,12 +329,12 @@ def update_item(item_id):
     ''' Update current inventory items '''
     item = Items.query.get_or_404(item_id)
     inv_items = Items.query.all()
-    form = NewItemForm()
+    form = UpdateItemForm()
     if form.validate_on_submit():
         item.itemname = form.itemname.data
         item.casepack = form.casepack.data
         db.session.commit()
-        flash('Product has been updated!', 'success')
+        flash(f'{item.itemname} has been updated!', 'success')
         return redirect(url_for('counts.new_item'))
     elif request.method == 'GET':
         form.itemname.data = item.itemname
@@ -332,7 +342,7 @@ def update_item(item_id):
     return render_template('counts/update_item.html',
                            title='Update Inventory Item',
                            form=form, inv_items=inv_items,
-                           item=item, legend='Update Item')
+                           item=item, legend='Update Case Pack for ')
 
 
 @counts.route("/item/<int:item_id>/delete", methods=['POST'])
