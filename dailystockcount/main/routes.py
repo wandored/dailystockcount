@@ -1,10 +1,10 @@
 ''' main/routes.py is the main flask routes page '''
+from datetime import timedelta
 from flask import render_template, Blueprint, redirect, url_for
 from flask_login import login_required
-from sqlalchemy import or_, and_, func
+from sqlalchemy import and_, func
 from dailystockcount import db
-from dailystockcount.models import Items, Invcount, Sales, Purchases
-from datetime import datetime, timedelta, date
+from dailystockcount.models import Invcount, Sales, Purchases
 
 
 main = Blueprint('main', __name__)
@@ -45,7 +45,7 @@ def report_details(item_name):
     last_count = Invcount.query.order_by(Invcount.trans_date.desc()).first()
     end_date = last_count.trans_date
     weekly = end_date - timedelta(days=6)
-    monthly = end_date - timedelta(days=27)
+    # monthly = end_date - timedelta(days=27)
 
     # Boxex Calculations
     count_daily = db.session.query(Invcount
@@ -70,20 +70,6 @@ def report_details(item_name):
                                           'average')
                                       ).filter(Invcount.itemname == item_name,
                                                Invcount.trans_date >= weekly).all()
-
-#    def get_daily_values(day):
-#        day_of_week = Sales.query.order_by(Sales.trans_date.desc()).first()
-#        day_sales = db.session.query(Sales,
-#                                     func.avg(Sales.eachcount).label('average')
-#                                     ).filter(Sales.itemname == item_name,
-#                                              Sales.trans_date == monthly,
-#                                              Sales.trans_date.weekday() == day).all()
-#        return day_sales.average
-#
-#    daily_values = []
-#    days = [2, 3, 4, 5, 6, 0, 1]
-#    for day in days:
-#        daily_values.append(get_daily_values(day))
 
     # Charts
     items_list = db.session.query(Invcount
