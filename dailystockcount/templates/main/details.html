@@ -1,187 +1,115 @@
 {% extends 'report_layout.html' %}
 {% block content %}
 <!-- Table -->
-<main role="main" class="container">
+<main role="main" class="container bg-steel">
   <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-12 p-1 pt-4">
       <div class="content-section">
-        <legend class="border-bottom mb-1">{{ item_name }}</legend>
-        <table class="table table-sm table-hover table-borderedless">
-          <thead>
-            <tr>
-              <th scope="col">Date</th>
-              <th scope="col">Begin</th>
-              <th scope="col">Purchases</th>
-              <th scope="col">Sales</th>
-              <th scope="col">Waste</th>
-              <th scope="col">Theory</th>
-              <th scope="col">Count</th>
-              <th scope="col">Variance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for c, s, w, p in result %}
-                <tr>
-                  <td>{{ c.trans_date.strftime('%A-%m/%d') }}</td>
-                  <td>{{ c.previous_total }}</td>
-                  {% if p %}
-                    <td> + {{ p }}</td>
-                  {% else %}
-                    <td> + 0</td>
-                  {% endif %}
-                  <td> - {{ s }}</td>
-                  <td> - {{ w }}</td>
-                  <td> = {{ c.theory }}</td>
-                  <td> - {{ c.count_total }}</td>
-                  <td> = {{ c.daily_variance }}</td>
-                </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <!-- Boxes -->
-    <div class="col-lg-4">
-      <div class="content-section">
-        <legend class="border-bottom mb-1">Weekly Total</legend>
-        {% for v in total_variance %}
-          {% if v.variance < 0 %}
-            <div class="alert alert-danger" role="alert">
-              <h5 class="alert-heading">Variance {{ v.variance }}</h5>
-            </div>
-          {% elif v.variance > 0 %}
-            <div class="alert alert-warning" role="alert">
-              <h5 class="alert-heading">Variance +{{ v.variance }}</h5>
-            </div>
-          {% elif v.variance == 0 %}
-            <div class="alert alert-success" role="alert">
-              <h5 class="alert-heading">Variance {{ v.variance }}</h5>
-            </div>
-          {% endif %}
-        {% endfor %}
-        {% for s in sales_wk %}
-        {% if s.weekly_waste > 0 %}
-            <div class="alert alert-danger" role="alert">
-              <h5 class="alert-heading">Waste {{ s.weekly_waste }}</h5>
-            </div>
-          {% elif s.weekly_waste < 0 %}
-            <div class="alert alert-warning" role="alert">
-              <h5 class="alert-heading">Waste +{{ s.weekly_waste }}</h5>
-            </div>
-          {% elif s.weekly_waste == 0 %}
-            <div class="alert alert-success" role="alert">
-              <h5 class="alert-heading">Waste {{ s.weekly_waste }}</h5>
-            </div>
-          {% endif %}
-        {% endfor %}
-        {% for s in sales_wk %}
-          <div class="alert alert-info" role="alert">
-            <h5 class="alert-heading">Sales {{ s.weekly_sales }}</h5>
-          </div>
-        {% endfor %}
-        {% for s in wkly_tot_purchase %}
-          <div class="alert alert-info" role="alert">
-            <h5 class="alert-heading">Purchases {{ s.purchases }}</h5>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="content-section">
-        <legend class="border-bottom mb-1">Weekly Average</legend>
-        {% for v in wkly_variance %}
-          {% if v.variance < 0 %}
-            <div class="alert alert-danger" role="alert">
-              <h5 class="alert-heading">Variance {{ "%.2f"|format(v.variance) }}</h5>
-            </div>
-          {% elif v.variance > 0 %}
-            <div class="alert alert-warning" role="alert">
-              <h5 class="alert-heading">Variance +{{ "%.2f"|format(v.variance) }}</h5>
-            </div>
-          {% elif v.variance == 0 %}
-            <div class="alert alert-success" role="alert">
-              <h5 class="alert-heading">Variance {{ "%.2f"|format(v.variance) }}</h5>
-            </div>
-          {% endif %}
-        {% endfor %}
-        {% for s in wkly_sales %}
-        {% if s.waste > 0 %}
-            <div class="alert alert-danger" role="alert">
-              <h5 class="alert-heading">Waste {{ "%.2f"|format(s.waste) }}</h5>
-            </div>
-          {% elif s.waste < 0 %}
-            <div class="alert alert-warning" role="alert">
-              <h5 class="alert-heading">Waste +{{ "%.2f"|format(s.waste) }}</h5>
-            </div>
-          {% elif s.waste == 0 %}
-            <div class="alert alert-success" role="alert">
-              <h5 class="alert-heading">Waste {{ "%.2f"|format(s.waste) }}</h5>
-            </div>
-          {% endif %}
-        {% endfor %}
-        {% for s in wkly_sales %}
-          <div class="alert alert-info" role="alert">
-            <h5 class="alert-heading">Sales {{ "%.1f"|format(s.average) }}</h5>
-          </div>
-        {% endfor %}
-        {% for c in wkly_on_hand %}
-          <div class="alert alert-info" role="alert">
-            <h5 class="alert-heading">On-Hand {{ "%.1f"|format(c.average) }}</h5>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="content-section">
-        <legend class="border-bottom mb-1">Monthly Average</legend>
-        {% for v in mon_avg_variance %}
-          {% if v.variance < 0 %}
-            <div class="alert alert-danger" role="alert">
-              <h5 class="alert-heading">Variance {{ "%.2f"|format(v.variance) }}</h5>
-            </div>
-          {% elif v.variance > 0 %}
-            <div class="alert alert-warning" role="alert">
-              <h5 class="alert-heading">Variance +{{ "%.2f"|format(v.variance) }}</h5>
-            </div>
-          {% elif v.variance == 0 %}
-            <div class="alert alert-success" role="alert">
-              <h5 class="alert-heading">Variance {{ "%.2f"|format(v.variance) }}</h5>
-            </div>
-          {% endif %}
-        {% endfor %}
-        {% for s in mon_avg_sales %}
-        {% if s.waste > 0 %}
-            <div class="alert alert-danger" role="alert">
-              <h5 class="alert-heading">Waste {{ "%.2f"|format(s.waste) }}</h5>
-            </div>
-          {% elif s.waste < 0 %}
-            <div class="alert alert-warning" role="alert">
-              <h5 class="alert-heading">Waste +{{ "%.2f"|format(s.waste) }}</h5>
-            </div>
-          {% elif s.waste == 0 %}
-            <div class="alert alert-success" role="alert">
-              <h5 class="alert-heading">Waste {{ "%.2f"|format(s.waste) }}</h5>
-            </div>
-          {% endif %}
-        {% endfor %}
-        {% for s in mon_avg_sales %}
-          <div class="alert alert-info" role="alert">
-            <h5 class="alert-heading">Sales {{ "%.1f"|format(s.average) }}</h5>
-          </div>
-        {% endfor %}
-        {% for c in mon_avg_on_hand %}
-          <div class="alert alert-info" role="alert">
-            <h5 class="alert-heading">On-Hand {{ "%.1f"|format(c.average) }}</h5>
-          </div>
-        {% endfor %}
+        <div class="table-responsive-sm">
+          <legend class="mb-1">{{ item_name }}</legend>
+          <table class="table table-sm table-hover table-borderedless">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Begin</th>
+                <th scope="col">Purchases</th>
+                <th scope="col">Sales</th>
+                <th scope="col">Waste</th>
+                <th scope="col">Theory</th>
+                <th scope="col">Count</th>
+                <th scope="col">Variance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c, s, w, p in result %}
+                  <tr>
+                    <td>{{ c.trans_date.strftime('%A-%m/%d') }}</td>
+                    <td>{{ c.previous_total }}</td>
+                    {% if p %}
+                      <td> + {{ p }}</td>
+                    {% else %}
+                      <td> + 0</td>
+                    {% endif %}
+                    {% if s %}
+                      <td> - {{ s }}</td>
+                    {% else %}
+                      <td> - 0</td>
+                    {% endif %}
+                    {% if s %}
+                      <td> - {{ w }}</td>
+                    {% else %}
+                      <td> - 0</td>
+                    {% endif %}
+                    <td> = {{ c.theory }}</td>
+                    <td> - {{ c.count_total }}</td>
+                    <td> = {{ c.daily_variance }}</td>
+                  </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
+    <!-- Boxes -->
+
+  <div class="row">
+    <div class="col-lg-3 p-1">
+      <div class="content-section bg-primary">
+        <legend class="text-white mb-1">Weekly Purchases</legend>
+        <div class="card text-center text-dark bg-light">
+          <div class="card-body">
+            {% for p in purchase_weekly %}
+              <h5 class="card-text">{{ p.total }}</h5>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 p-1">
+      <div class="content-section bg-primary">
+        <legend class="text-white mb-1">Weekly Sales</legend>
+        <div class="card text-center text-dark bg-light">
+          <div class="card-body">
+            {% for p in sales_weekly %}
+              <h5 class="card-text">{{ p.total }}</h5>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 p-1">
+      <div class="content-section bg-primary">
+        <legend class="text-white mb-1">Average On-Hand</legend>
+        <div class="card text-center text-dark bg-light">
+          <div class="card-body">
+            {% for c in on_hand_weekly %}
+              <h5 class="card-text">{{ "%.1f"|format(c.average) }}</h5>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 p-1">
+      <div class="content-section bg-primary">
+        <legend class="text-white mb-1">Days On-Hand</legend>
+        <div class="card text-center text-dark bg-light">
+          <div class="card-body">
+            {% for s in sales_weekly %}
+            <h5 class="card-text">{{ "%.1f"|format(count_daily.count_total/s.sales_avg) }}</h5>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Chart -->
   <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-6 p-1">
       <div class="content-section">
-        <canvas id="barChart" width="900" height="400"></canvas>
+      <div class="table-responsive-sm">
+        <canvas id="barChart"></canvas>
         <script>
           var ctx = document.getElementById("barChart").getContext("2d");
           var barChart = new Chart(ctx, {
@@ -209,14 +137,78 @@
               title: {
                 display: true,
                 text: "{{ item_name }}",
-              },
-              responsive: true
+              }
             }
           });
         </script>
       </div>
+      </div>
     </div>
-  </div>
-
+  <!-- Chart2
+    <div class="col-lg-6 p-1">
+      <div class="content-section">
+      <div class="table-responsive-sm">
+        <canvas id="horzBarChart"></canvas>
+        <script>
+          var ctx = document.getElementById("horzBarChart").getContext("2d");
+          var horzBarChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"],
+              datasets: [{
+                axis: 'y'
+                label: "Daily Average Sales",
+                data: {{ daily_values | safe }},
+                fill: false,
+                backgroundColor: [
+                 'rgba(255, 99, 132, 0.2)',
+                 'rgba(255, 159, 64, 0.2)',
+                 'rgba(255, 205, 86, 0.2)',
+                 'rgba(75, 192, 192, 0.2)',
+                 'rgba(54, 162, 235, 0.2)',
+                 'rgba(153, 102, 255, 0.2)',
+                 'rgba(201, 203, 207, 0.2)'
+               ],
+               borderColor: [
+                 'rgb(255, 99, 132)',
+                 'rgb(255, 159, 64)',
+                 'rgb(255, 205, 86)',
+                 'rgb(75, 192, 192)',
+                 'rgb(54, 162, 235)',
+                 'rgb(153, 102, 255)',
+                 'rgb(201, 203, 207)'
+               ],
+               borderWidth: 1
+               }] 
+            },
+            options: {
+            }
+          });
+        </script>
+      </div>
+      </div>
+    </div>
+  </div> -->
+  <!-- weekly boxes
+    <div class="col-lg-3 p-1">
+      <div class="content-section bg-primary">
+        <legend class="text-white mb-1">Average Sales per Day</legend>
+        <div class="card text-center text-dark bg-light">
+          <div class="card-body">
+            {% for d in monday_sales %}
+              <h5 class="card-text">Monday - {{ "%.1f"|format(d.average) }}</h5>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="card text-center text-dark bg-light">
+          <div class="card-body">
+            {% for d in monday_sales %}
+              <h5 class="card-text">Tuesday - {{ "%.1f"|format(d.average) }}</h5>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
 </div>
 {% endblock content %}

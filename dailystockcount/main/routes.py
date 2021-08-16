@@ -4,7 +4,7 @@ from flask_login import login_required
 from sqlalchemy import or_, and_, func
 from dailystockcount import db
 from dailystockcount.models import Items, Invcount, Sales, Purchases
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 
 main = Blueprint('main', __name__)
@@ -47,34 +47,50 @@ def report_details(item_name):
     weekly = end_date - timedelta(days=6)
     monthly = end_date - timedelta(days=27)
 
-    # Calculate Weekly Averages
-    wkly_on_hand = db.session.query(Invcount, func.avg(Invcount.count_total).label(
-        'average')).filter(Invcount.itemname == item_name, Invcount.trans_date >= weekly).all()
-    wkly_variance = db.session.query(Invcount, func.avg(Invcount.daily_variance).label('variance')).filter(
-        Invcount.itemname == item_name, Invcount.trans_date >= weekly).all()
-    wkly_sales = db.session.query(Sales, func.avg(Sales.eachcount).label('average'), func.avg(Sales.waste).label('waste')).filter(
-        Sales.itemname == item_name, Sales.trans_date >= weekly).all()
+    # Boxex Calculations
+    count_daily = db.session.query(Invcount
+                                   ).filter(Invcount.itemname == item_name,
+                                            Invcount.count_time == "PM",
+                                            Invcount.trans_date == end_date).first()
+    sales_weekly = db.session.query(Sales,
+                                    func.sum(Sales.eachcount).label('total'),
+                                    func.avg(Sales.eachcount).label(
+                                        'sales_avg')
+                                    ).filter(Sales.itemname == item_name,
+                                             Sales.count_time == "PM",
+                                             Sales.trans_date >= weekly).all()
+    purchase_weekly = db.session.query(Purchases,
+                                       func.sum(Purchases.purchase_total).label(
+                                           'total')
+                                       ).filter(Purchases.itemname == item_name,
+                                                Purchases.count_time == "PM",
+                                                Purchases.trans_date >= weekly).all()
+    on_hand_weekly = db.session.query(Invcount,
+                                      func.avg(Invcount.count_total).label(
+                                          'average')
+                                      ).filter(Invcount.itemname == item_name,
+                                               Invcount.trans_date >= weekly).all()
 
-    # Calculate Monthly Averages
-    mon_avg_on_hand = db.session.query(Invcount, func.avg(Invcount.count_total).label(
-        'average')).filter(Invcount.itemname == item_name, Invcount.trans_date >= monthly).all()
-    mon_avg_variance = db.session.query(Invcount, func.avg(Invcount.daily_variance).label('variance')).filter(
-        Invcount.itemname == item_name, Invcount.trans_date >= monthly).all()
-    mon_avg_sales = db.session.query(Sales, func.avg(Sales.eachcount).label('average'), func.avg(Sales.waste).label('waste')).filter(
-        Sales.itemname == item_name, Sales.trans_date >= monthly).all()
-
-    # Calculate Weekly Totals
-    total_variance = db.session.query(Invcount, func.sum(Invcount.daily_variance).label('variance')).filter(
-        Invcount.itemname == item_name, Invcount.trans_date >= weekly).all()
-    sales_wk = db.session.query(Sales, func.sum(Sales.eachcount).label('weekly_sales'), func.sum(Sales.waste).label('weekly_waste')).filter(
-        Sales.itemname == item_name, Sales.trans_date >= weekly).all()
-    wkly_tot_purchase = db.session.query(Purchases, func.sum(Purchases.purchase_total).label('purchases')).filter(
-        Purchases.itemname == item_name, Purchases.trans_date >= weekly).all()
+#    def get_daily_values(day):
+#        day_of_week = Sales.query.order_by(Sales.trans_date.desc()).first()
+#        day_sales = db.session.query(Sales,
+#                                     func.avg(Sales.eachcount).label('average')
+#                                     ).filter(Sales.itemname == item_name,
+#                                              Sales.trans_date == monthly,
+#                                              Sales.trans_date.weekday() == day).all()
+#        return day_sales.average
+#
+#    daily_values = []
+#    days = [2, 3, 4, 5, 6, 0, 1]
+#    for day in days:
+#        daily_values.append(get_daily_values(day))
 
     # Charts
-    items_list = db.session.query(Invcount).filter(Invcount.itemname == item_name,
-                                                   Invcount.count_time == "PM",
-                                                   Invcount.trans_date >= weekly).order_by(Invcount.trans_date).all()
+    items_list = db.session.query(Invcount
+                                  ).filter(Invcount.itemname == item_name,
+                                           Invcount.count_time == "PM",
+                                           Invcount.trans_date >= weekly
+                                           ).order_by(Invcount.trans_date).all()
     labels = []
     values = []
     for i in items_list:
@@ -88,9 +104,12 @@ def report_details(item_name):
         day_sales.append(i.sales_total)
 
     # Weekly Details Table
-    result = db.session.query(Invcount, func.sum(Sales.eachcount).label('sales_count'),
+    result = db.session.query(Invcount,
+                              func.sum(Sales.eachcount).label('sales_count'),
                               func.sum(Sales.waste).label('sales_waste'),
-                              func.sum(Purchases.purchase_total).label('purchase_count')).select_from(Invcount). \
+                              func.sum(Purchases.purchase_total).label(
+                                  'purchase_count')
+                              ).select_from(Invcount). \
         outerjoin(Sales, and_(Sales.trans_date == Invcount.trans_date,
                               Sales.itemname == item_name)). \
         outerjoin(Purchases, and_(Purchases.trans_date == Invcount.trans_date,
@@ -102,26 +121,13 @@ def report_details(item_name):
                Invcount.count_time ==
                "PM", Invcount.trans_date >= weekly)
 
-#    result = db.session.query(Invcount, Sales, Purchases).select_from(Invcount). \
-#        filter(and_(Invcount.itemname == item_name, Invcount.count_time == "PM", Invcount.trans_date >= weekly)). \
-#        outerjoin(Sales, Sales.trans_date == Invcount.trans_date). \
-#        filter(or_(Sales.itemname == item_name, Sales.itemname == None)). \
-#        outerjoin(Purchases, Purchases.trans_date == Invcount.trans_date). \
-#        filter(or_(Purchases.itemname == item_name, Purchases.itemname == None)). \
-#        order_by(Invcount.trans_date.desc()).all()
     return render_template('main/details.html',
                            title='Item Variance Details',
-                           wkly_on_hand=wkly_on_hand,
-                           sales_wk=sales_wk,
-                           wkly_sales=wkly_sales,
-                           total_variance=total_variance,
-                           wkly_variance=wkly_variance,
-                           wkly_tot_purchase=wkly_tot_purchase,
-                           mon_avg_sales=mon_avg_sales,
-                           mon_avg_variance=mon_avg_variance,
-                           mon_avg_on_hand=mon_avg_on_hand,
+                           count_daily=count_daily,
+                           sales_weekly=sales_weekly,
+                           purchase_weekly=purchase_weekly,
+                           on_hand_weekly=on_hand_weekly,
                            item_name=item_name,
-                           items_list=items_list,
                            labels=labels,
                            values=values,
                            day_sales=day_sales,
