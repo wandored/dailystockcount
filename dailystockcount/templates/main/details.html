@@ -95,7 +95,11 @@
         <div class="card text-center text-dark bg-light">
           <div class="card-body">
             {% for s in sales_weekly %}
-            <h5 class="card-text">{{ "%.1f"|format(count_daily.count_total/s.sales_avg) }}</h5>
+            {% if s.sales_avg and count_daily.count_total %}
+                <h5 class="card-text">{{ "%.1f"|format(count_daily.count_total/s.sales_avg) }}</h5>
+              {% else %}
+                <h5 class="card-text">N/A</h5>
+              {% endif %}
             {% endfor %}
           </div>
         </div>

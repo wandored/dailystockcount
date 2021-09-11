@@ -1,9 +1,12 @@
 *.db
 output/
 __pycache__/
+dailystockcount/site.*
+homepage/
 dailystockcount/__pycache__/
 dailystockcount/main/__pycache__/
 dailystockcount/users/__pycache__/
 dailystockcount/counts/__pycache__/
 venv/
 downloads/
+dailystockcount/static/img/QRCode.svg

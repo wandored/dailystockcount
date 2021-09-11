@@ -1,17 +1,14 @@
 ''' count/routes.py is flask routes for counts, purchases, sales and items. '''
-from flask import (render_template,
-                   url_for,
-                   flash,
-                   redirect,
-                   request,
-                   Blueprint)
+from flask import (render_template, url_for, flash,
+                   redirect, request, Blueprint)
 from flask_login import current_user, login_required
 from dailystockcount import db
 from dailystockcount.models import Invcount, Purchases, Sales, Items
 from dailystockcount.counts.utils import calculate_totals
-from dailystockcount.counts.forms import (EnterCountForm, UpdateCountForm, EnterSalesForm,
-                                          UpdateSalesForm, EnterPurchasesForm,
-                                          UpdatePurchasesForm, NewItemForm, UpdateItemForm)
+from dailystockcount.counts.forms import (EnterCountForm, UpdateCountForm,
+                                          EnterSalesForm, UpdateSalesForm,
+                                          EnterPurchasesForm, UpdatePurchasesForm,
+                                          NewItemForm, UpdateItemForm)
 
 counts = Blueprint('counts', __name__)
 
@@ -23,16 +20,21 @@ def count():
     page = request.args.get('page', 1, type=int)
     inv_items = Invcount.query.all()
     group_items = Invcount.query.group_by(
-        Invcount.trans_date, Invcount.count_time)
+        Invcount.trans_date,
+        Invcount.count_time)
     ordered_items = group_items.order_by(
-        Invcount.trans_date.desc(), Invcount.count_time.desc()).paginate(page=page, per_page=10)
+        Invcount.trans_date.desc(),
+        Invcount.count_time.desc()).paginate(
+            page=page,
+            per_page=10)
     form = EnterCountForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
             itemname=form.itemname.data.itemname).first()
+
+        # Calculate the previous count
         filter_item = Invcount.query.filter(
             Invcount.itemname == form.itemname.data.itemname)
-
         previous_count = filter_item.order_by(
             Invcount.trans_date.desc()).first()
         if previous_count is None:
@@ -40,6 +42,7 @@ def count():
         else:
             total_previous = previous_count.count_total
 
+        # Calculate total purchases
         purchase_item = Purchases.query.filter_by(
             itemname=form.itemname.data.itemname,
             trans_date=form.transdate.data).first()
@@ -48,6 +51,7 @@ def count():
         else:
             total_purchase = purchase_item.purchase_total
 
+        # Calculate total sales
         sales_item = Sales.query.filter_by(
             itemname=form.itemname.data.itemname,
             trans_date=form.transdate.data).first()

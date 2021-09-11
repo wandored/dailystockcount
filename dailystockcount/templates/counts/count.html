@@ -86,7 +86,7 @@
     {% if item.trans_date == group.trans_date and item.count_time == group.count_time %}
         <div class="media-body">
           <a class="me-2" href="{{ url_for('counts.update_count', item_id=item.id) }}">{{ item.itemname }}</a>
-          <small class="text-muted">{{ item.casecount }} Cases / {{ item.eachcount }} Each  /  {{ item.count_total }} Total {{ ordered_count}}</small>
+          <small class="text-muted">{{ item.casecount }} Cases + {{ item.eachcount }} Each  =  {{ item.count_total }} Total {{ ordered_count}}</small>
         </div>
       {% endif %}
     {% endfor %}
