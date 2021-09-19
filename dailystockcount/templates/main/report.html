@@ -15,7 +15,7 @@
                   <h5 class="card-text">{{ count.daily_variance }}</h5>
                 </div>
               </div>
-              <a href="{{ url_for('main.report_details', item_name=count.itemname) }}" class="btn btn-primary">More Details</a>
+              <a href="{{ url_for('main.report_details', product=count.item_id) }}" class="btn btn-primary">More Details</a>
             </div>
           {% elif count.daily_variance > 0 %}
             <div class="content-section bg-warning">
@@ -25,7 +25,7 @@
                   <h5 class="card-text">{{ count.daily_variance }}</h5>
                 </div>
               </div>
-              <a href="{{ url_for('main.report_details', item_name=count.itemname) }}" class="btn btn-primary">More Details</a>
+              <a href="{{ url_for('main.report_details', product=count.item_id) }}" class="btn btn-primary">More Details</a>
             </div>
           {% elif count.daily_variance == 0 %}
             <div class="content-section bg-success">
@@ -35,7 +35,7 @@
                   <h5 class="card-text">{{ count.daily_variance }}</h5>
                 </div>
               </div>
-              <a href="{{ url_for('main.report_details', item_name=count.itemname) }}" class="btn btn-primary">More Details</a>
+              <a href="{{ url_for('main.report_details', product=count.item_id) }}" class="btn btn-primary">More Details</a>
             </div>
           {% endif %}
         </div>

@@ -8,19 +8,19 @@ def calculate_totals(item_id):
     ''' Run the variance calculations for each item '''
     unit = Items.query.get_or_404(item_id)
     filter_item = Invcount.query.filter(
-        Invcount.itemname == unit.itemname)
+        Invcount.item_id == unit.id)
     ordered_count = filter_item.order_by(
         Invcount.trans_date.desc(), Invcount.count_time.desc()).first()
 
     purchase_item = Purchases.query.filter_by(
-        itemname=unit.itemname, trans_date=ordered_count.trans_date).first()
+        item_id=unit.id, trans_date=ordered_count.trans_date).first()
     if purchase_item is None:
         total_purchase = 0
     else:
         total_purchase = purchase_item.purchase_total
 
     sales_item = Sales.query.filter_by(
-        itemname=unit.itemname, trans_date=ordered_count.trans_date).first()
+        item_id=unit.id, trans_date=ordered_count.trans_date).first()
     if sales_item is None:
         total_sales = 0
     else:

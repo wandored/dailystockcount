@@ -30,7 +30,7 @@ def count():
     form = EnterCountForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
-            itemname=form.itemname.data.itemname).first()
+            id=form.itemname.data.id).first()
 
         # Calculate the previous count
         filter_item = Invcount.query.filter(
@@ -44,7 +44,7 @@ def count():
 
         # Calculate total purchases
         purchase_item = Purchases.query.filter_by(
-            itemname=form.itemname.data.itemname,
+            item_id=form.itemname.data.id,
             trans_date=form.transdate.data).first()
         if purchase_item is None:
             total_purchase = 0
@@ -53,7 +53,7 @@ def count():
 
         # Calculate total sales
         sales_item = Sales.query.filter_by(
-            itemname=form.itemname.data.itemname,
+            item_id=form.itemname.data.id,
             trans_date=form.transdate.data).first()
         if sales_item is None:
             total_sales = 0
@@ -75,7 +75,7 @@ def count():
             daily_variance=((items_object.casepack * form.casecount.data +
                              form.eachcount.data) -
                             (total_previous + total_purchase - total_sales)),
-            manager=current_user)
+            item_id=form.itemname.data.id)
         db.session.add(inventory)
         db.session.commit()
         flash(
@@ -88,19 +88,24 @@ def count():
                            inv_items=inv_items, ordered_items=ordered_items)
 
 
-@counts.route("/count/<int:item_id>/update", methods=['GET', 'POST'])
+@counts.route("/count/<int:count_id>/update", methods=['GET', 'POST'])
 @login_required
-def update_count(item_id):
+def update_count(count_id):
     ''' route for count/id/update '''
-    item = Invcount.query.get_or_404(item_id)
+    item = Invcount.query.get_or_404(count_id)
     inv_items = Invcount.query.all()
     form = UpdateCountForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
             itemname=form.itemname.data).first()
 
+
+'''
+Need to find a way to identify item by id and not item name in "filter_item"
+'''
+
         filter_item = Invcount.query.filter(
-            Invcount.itemname == form.itemname.data,
+            Invcount.item_id == form.itemname.data,
             Invcount.trans_date <= form.transdate.data)
         ordered_count = filter_item.order_by(
             Invcount.trans_date.desc(), Invcount.count_time.desc()).offset(1).first()
@@ -150,11 +155,11 @@ def update_count(item_id):
                            item=item, legend='Update Count')
 
 
-@counts.route("/count/<int:item_id>/delete", methods=['POST'])
+@counts.route("/count/<int:count_id>/delete", methods=['POST'])
 @login_required
-def delete_count(item_id):
+def delete_count(count_id):
     ''' Delete an item count '''
-    item = Invcount.query.get_or_404(item_id)
+    item = Invcount.query.get_or_404(count_id)
     db.session.delete(item)
     db.session.commit()
     flash('Item counts have been deleted!', 'success')
@@ -178,12 +183,14 @@ def purchases():
     form = EnterPurchasesForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
-            itemname=form.itemname.data.itemname).first()
+            id=form.itemname.data.id).first()
         purchase = Purchases(trans_date=form.transdate.data,
                              count_time='PM',
                              itemname=form.itemname.data.itemname,
                              casecount=form.casecount.data,
-                             purchase_total=(items_object.casepack * form.casecount.data))
+                             purchase_total=(
+                                 items_object.casepack * form.casecount.data),
+                             item_id=form.itemname.data.id)
         db.session.add(purchase)
         db.session.commit()
         flash(
@@ -196,10 +203,10 @@ def purchases():
                            ordered_purchases=ordered_purchases)
 
 
-@counts.route("/purchases/<int:item_id>/update", methods=['GET', 'POST'])
+@counts.route("/purchases/<int:purchase_id>/update", methods=['GET', 'POST'])
 @login_required
-def update_purchases(item_id):
-    item = Purchases.query.get_or_404(item_id)
+def update_purchases(purchase_id):
+    item = Purchases.query.get_or_404(purchase_id)
     inv_items = Purchases.query.all()
     form = UpdatePurchasesForm()
     if form.validate_on_submit():
@@ -223,10 +230,10 @@ def update_purchases(item_id):
                            item=item, legend='Update Purchases')
 
 
-@counts.route("/purchases/<int:item_id>/delete", methods=['POST'])
+@counts.route("/purchases/<int:purchase_id>/delete", methods=['POST'])
 @login_required
-def delete_purchases(item_id):
-    item = Purchases.query.get_or_404(item_id)
+def delete_purchases(purchase_id):
+    item = Purchases.query.get_or_404(purchase_id)
     unit = Items.query.filter_by(
         itemname=item.itemname).first()
     db.session.delete(item)
@@ -248,17 +255,18 @@ def sales():
     form = EnterSalesForm()
     if form.validate_on_submit():
         unit = Items.query.filter_by(
-            itemname=form.itemname.data.itemname).first()
+            id=form.itemname.data.id).first()
         sale = Sales(trans_date=form.transdate.data,
                      count_time='PM',
                      itemname=form.itemname.data.itemname,
                      eachcount=form.eachcount.data,
                      waste=form.waste.data,
-                     sales_total=(form.eachcount.data + form.waste.data))
+                     sales_total=(form.eachcount.data + form.waste.data),
+                     item_id=form.itemname.data.id)
         db.session.add(sale)
         db.session.commit()
         flash(
-            f'Sales submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
+            f'Sales of {form.eachcount.data + form.waste.data} {form.itemname.data.itemname} submitted on {form.transdate.data}!', 'success')
         calculate_totals(unit.id)
         return redirect(url_for('counts.sales'))
     return render_template('counts/sales.html', title='Sales',

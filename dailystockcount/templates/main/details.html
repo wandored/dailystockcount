@@ -6,7 +6,7 @@
     <div class="col-lg-12 p-1 pt-4">
       <div class="content-section">
         <div class="table-responsive-sm">
-          <legend class="mb-1">{{ item_name }}</legend>
+          <legend class="mb-1">{{ item_name.itemname }}</legend>
           <table class="table table-sm table-hover table-borderedless">
             <thead>
               <tr>
@@ -139,7 +139,7 @@
             options: {
               title: {
                 display: true,
-                text: "{{ item_name }}",
+                text: "{{ item_name.itemname }}",
               }
             }
           });

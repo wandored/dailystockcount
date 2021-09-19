@@ -57,7 +57,7 @@
           {% for item in purchase_items%}
             {% if item.trans_date == group.trans_date  %}
               <div class="media-body">
-                  <a class="me-2" href="{{ url_for('counts.update_purchases', item_id=item.id) }}">{{ item.itemname }}</a>
+                  <a class="me-2" href="{{ url_for('counts.update_purchases', purchase_id=item.id) }}">{{ item.itemname }}</a>
                 <small class="text-muted"> Cases Purchased  -  {{ item.casecount }}</small>
               </div>
             {% endif %}

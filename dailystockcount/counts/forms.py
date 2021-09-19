@@ -24,7 +24,8 @@ class NewItemForm(FlaskForm):
 
 
 class UpdateItemForm(FlaskForm):
-    itemname = HiddenField(validators=[DataRequired()])
+    itemname = StringField('Item Name: ',
+                           validators=[DataRequired()])
     casepack = IntegerField('# per Case: ',
                             validators=[DataRequired()])
     submit = SubmitField('Submit')
