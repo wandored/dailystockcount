@@ -1,5 +1,5 @@
 ''' main/routes.py is the main flask routes page '''
-from datetime import timedelta
+from datetime import timedelta, datetime, date
 from flask import render_template, Blueprint, redirect, url_for, flash
 from flask_login import login_required
 from sqlalchemy import and_, func
@@ -20,6 +20,10 @@ def home():
 @login_required
 def report():
     ''' route for reports.html '''
+    is_items = Items.query.first()
+    if not is_items:
+        flash('The first step is to add the items you want to count!', 'warning')
+        return redirect(url_for('counts.new_item'))
     ordered_counts = Invcount.query.order_by(
         Invcount.trans_date.desc(),
         Invcount.count_time.desc(),
@@ -85,10 +89,19 @@ def report_details(product):
         values.append(i.count_total)
 
     sales_list = db.session.query(Sales).filter(
-        Sales.item_id == product, Sales.trans_date >= weekly).order_by(Sales.trans_date).all()
+        Sales.item_id == product,
+        Sales.trans_date >= weekly).order_by(Sales.trans_date).all()
     day_sales = []
     for i in sales_list:
         day_sales.append(i.sales_total)
+
+#  for day of week sales averages chart.
+#    monday_sales = db.session.query(Sales,
+#                                    func.sum(Sales.sales_total).label(
+#                                        'mon_tot')
+#                                    ).filter(Sales.item_id == product,
+#                                             func.extract(datetime(
+#                                                 Sales.trans_date, 'dow') == 0))
 
     # Weekly Details Table
     result = db.session.query(Invcount,
@@ -101,7 +114,7 @@ def report_details(product):
                               Sales.item_id == product)). \
         outerjoin(Purchases, and_(Purchases.trans_date == Invcount.trans_date,
                                   Purchases.item_id == product)). \
-        group_by(Invcount.itemname,
+        group_by(Invcount.item_id,
                  Invcount.trans_date). \
         order_by(Invcount.trans_date.desc()). \
         filter(Invcount.item_id == product,
@@ -121,4 +134,5 @@ def report_details(product):
                            labels=labels,
                            values=values,
                            day_sales=day_sales,
+                           #                           monday_sales=monday_sales,
                            result=result)

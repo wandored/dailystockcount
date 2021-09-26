@@ -34,7 +34,7 @@ def count():
 
         # Calculate the previous count
         filter_item = Invcount.query.filter(
-            Invcount.itemname == form.itemname.data.itemname)
+            Invcount.item_id == form.itemname.data.id)
         previous_count = filter_item.order_by(
             Invcount.trans_date.desc()).first()
         if previous_count is None:
@@ -97,32 +97,29 @@ def update_count(count_id):
     form = UpdateCountForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
-            itemname=form.itemname.data).first()
-
-
-'''
-Need to find a way to identify item by id and not item name in "filter_item"
-'''
-
+            id=form.item_id.data).first()
         filter_item = Invcount.query.filter(
-            Invcount.item_id == form.itemname.data,
+            Invcount.item_id == form.item_id.data,
             Invcount.trans_date <= form.transdate.data)
         ordered_count = filter_item.order_by(
-            Invcount.trans_date.desc(), Invcount.count_time.desc()).offset(1).first()
+            Invcount.trans_date.desc(),
+            Invcount.count_time.desc()).offset(1).first()
         if ordered_count is None:
             total_previous = 0
         else:
             total_previous = ordered_count.count_total
 
         purchase_item = Purchases.query.filter_by(
-            itemname=form.itemname.data, trans_date=form.transdate.data).first()
+            item_id=form.item_id.data,
+            trans_date=form.transdate.data).first()
         if purchase_item is None:
             total_purchase = 0
         else:
             total_purchase = purchase_item.purchase_total
 
         sales_item = Sales.query.filter_by(
-            itemname=form.itemname.data, trans_date=form.transdate.data).first()
+            item_id=form.item_id.data,
+            trans_date=form.transdate.data).first()
         if sales_item is None:
             total_sales = 0
         else:
@@ -143,7 +140,8 @@ Need to find a way to identify item by id and not item name in "filter_item"
         db.session.commit()
         flash('Item counts have been updated!', 'success')
         return redirect(url_for('counts.count'))
-    elif request.method == 'GET':
+    if request.method == 'GET':
+        form.item_id.data = item.item_id
         form.transdate.data = item.trans_date
         form.am_pm.data = item.count_time
         form.itemname.data = item.itemname
@@ -151,8 +149,10 @@ Need to find a way to identify item by id and not item name in "filter_item"
         form.eachcount.data = item.eachcount
     return render_template('counts/update_count.html',
                            title='Update Item Count',
-                           form=form, inv_items=inv_items,
-                           item=item, legend='Update Count')
+                           form=form,
+                           inv_items=inv_items,
+                           item=item,
+                           legend='Update Count')
 
 
 @counts.route("/count/<int:count_id>/delete", methods=['POST'])
@@ -188,8 +188,9 @@ def purchases():
                              count_time='PM',
                              itemname=form.itemname.data.itemname,
                              casecount=form.casecount.data,
+                             eachcount=form.eachcount.data,
                              purchase_total=(
-                                 items_object.casepack * form.casecount.data),
+                                 items_object.casepack * form.casecount.data + form.eachcount.data),
                              item_id=form.itemname.data.id)
         db.session.add(purchase)
         db.session.commit()
@@ -197,8 +198,10 @@ def purchases():
             f'Purchases submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
         calculate_totals(items_object.id)
         return redirect(url_for('counts.purchases'))
-    return render_template('counts/purchases.html', title='Purchases',
-                           form=form, purchase_items=purchase_items,
+    return render_template('counts/purchases.html',
+                           title='Purchases',
+                           form=form,
+                           purchase_items=purchase_items,
                            inv_items=inv_items,
                            ordered_purchases=ordered_purchases)
 
@@ -211,19 +214,23 @@ def update_purchases(purchase_id):
     form = UpdatePurchasesForm()
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
-            itemname=form.itemname.data).first()
+            id=form.item_id.data).first()
         item.trans_date = form.transdate.data
         item.itemname = form.itemname.data
         item.casecount = form.casecount.data
-        item.purchase_total = (items_object.casepack * form.casecount.data)
+        item.eachcount = form.eachcount.data
+        item.purchase_total = (items_object.casepack *
+                               form.casecount.data + form.eachcount.data)
         db.session.commit()
         flash('Item purchases have been updated!', 'success')
-        calculate_totals(items_object.id)
+#        calculate_totals(items_object.id)
         return redirect(url_for('counts.purchases'))
     elif request.method == 'GET':
         form.transdate.data = item.trans_date
         form.itemname.data = item.itemname
         form.casecount.data = item.casecount
+        form.eachcount.data = item.eachcount
+        form.item_id.data = item.item_id
     return render_template('counts/update_purchases.html',
                            title='Update Item Purchases',
                            form=form, inv_items=inv_items,
@@ -298,6 +305,7 @@ def update_sales(item_id):
         form.itemname.data = item.itemname
         form.eachcount.data = item.eachcount
         form.waste.data = item.waste
+        form.item_id.data = item.item_id
     return render_template('counts/update_sales.html', title='Update Item Sales',
                            form=form, inv_items=inv_items,
                            item=item, legend='Update Sales')

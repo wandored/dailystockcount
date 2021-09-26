@@ -44,6 +44,19 @@
                     {{ form.casecount(class="form=control form-control-md") }}
                 {% endif %}
             </div>
+            <div class="form-group">
+                {{ form.eachcount.label(class="form=control-label") }}
+                {% if form.eachcount.errors %}
+                {{ form.eachcount(class="form=control form-control-md is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.eachcount.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.eachcount(class="form=control form-control-md") }}
+                {% endif %}
+            </div>
         </fieldset>
         <div class="form-group mb-1">
             {{ form.submit(class="btn btn-primary") }}
@@ -58,7 +71,7 @@
             {% if item.trans_date == group.trans_date  %}
               <div class="media-body">
                   <a class="me-2" href="{{ url_for('counts.update_purchases', purchase_id=item.id) }}">{{ item.itemname }}</a>
-                <small class="text-muted"> Cases Purchased  -  {{ item.casecount }}</small>
+                  <small class="text-muted"> Total Purchased  -  {{ item.purchase_total }}</small>
               </div>
             {% endif %}
           {% endfor %}
