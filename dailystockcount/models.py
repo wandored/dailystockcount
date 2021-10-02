@@ -21,7 +21,6 @@ class User(db.Model, UserMixin):
                            default='default_user.jpeg')
     password = db.Column(db.String(60), nullable=False)
     admin = db.Column(db.Integer, default=0)
-    counts = db.relationship('Invcount', backref='manager', lazy=True)
 
     def get_reset_token(self, expires_sec):
         ''' get password reset token for user '''
@@ -45,6 +44,9 @@ class Items(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     itemname = db.Column(db.String(), nullable=False)
     casepack = db.Column(db.Integer)
+    count = db.relationship('Invcount', backref='count_id', lazy=True)
+    buy = db.relationship('Invcount', backref='buy_id', lazy=True)
+    sell = db.relationship('Invcount', backref='sell_id', lazy=True)
 
     def __repr__(self):
         return f"Items('{self.id}', '{self.itemname}', '{self.casepack}')"
@@ -56,13 +58,13 @@ class Invcount(db.Model):
                            default=datetime.utcnow)
     count_time = db.Column(db.String(), nullable=False)
     itemname = db.Column(db.String(), nullable=False)
-    casecount = db.Column(db.Integer)
-    eachcount = db.Column(db.Integer)
+    casecount = db.Column(db.Integer, nullable=False)
+    eachcount = db.Column(db.Integer, nullable=False)
     count_total = db.Column(db.Integer, nullable=False)
     previous_total = db.Column(db.Integer, nullable=False)
     theory = db.Column(db.Integer, nullable=False)
     daily_variance = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
 
     def __repr__(self):
         return f"Invcount('{self.trans_date}', '{self.count_time}', '{self.itemname}', '{self.casecount}', '{self.eachcount}', '{self.count_total}')"
@@ -74,8 +76,10 @@ class Purchases(db.Model):
                            default=datetime.utcnow)
     count_time = db.Column(db.String(), nullable=False)
     itemname = db.Column(db.String(), nullable=False)
-    casecount = db.Column(db.Integer)
+    casecount = db.Column(db.Integer, nullable=False)
+    eachcount = db.Column(db.Integer, nullable=False)
     purchase_total = db.Column(db.Integer, nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
 
     def __repr__(self):
         return f"Purchases('{self.trans_date}', '{self.itemname}', '{self.count_time}', '{self.casecount}', '{self.purchase_total}')"
@@ -87,9 +91,10 @@ class Sales(db.Model):
                            default=datetime.utcnow)
     count_time = db.Column(db.String(), nullable=False)
     itemname = db.Column(db.String(), nullable=False)
-    eachcount = db.Column(db.Integer)
-    waste = db.Column(db.Integer)
+    eachcount = db.Column(db.Integer, nullable=False)
+    waste = db.Column(db.Integer, nullable=False)
     sales_total = db.Column(db.Integer, nullable=False)
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'), nullable=False)
 
     def __repr__(self):
         return f"Sales('{self.trans_date}', '{self.itemname}', '{self.eachcount}', '{self.waste}', '{self.sales_total}')"

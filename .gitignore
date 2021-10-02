@@ -1,4 +1,5 @@
 *.db
+*.sql
 output/
 __pycache__/
 dailystockcount/site.*

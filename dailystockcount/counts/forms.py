@@ -24,7 +24,8 @@ class NewItemForm(FlaskForm):
 
 
 class UpdateItemForm(FlaskForm):
-    itemname = HiddenField(validators=[DataRequired()])
+    itemname = StringField('Item Name: ',
+                           validators=[DataRequired()])
     casepack = IntegerField('# per Case: ',
                             validators=[DataRequired()])
     submit = SubmitField('Submit')
@@ -54,18 +55,19 @@ class UpdateCountForm(FlaskForm):
                         choices=['PM', 'AM'])
     itemname = StringField('Item Name: ',
                            validators=[DataRequired()])
+    item_id = HiddenField(validators=[DataRequired()])
     casecount = IntegerField('Case Count: ')
     eachcount = IntegerField('Each Count: ')
     submit = SubmitField('Submit!')
 
 
-class PurchaseForm(Form):
-    itemname = QuerySelectField('Item Name: ',
-                                query_factory=item_query,
-                                allow_blank=True,
-                                get_label='itemname')
-    casecount = IntegerField('Cases Purchased: ',
-                             default=0)
+# class PurchaseForm(Form):      for entering all items at same time.  not working
+#    itemname = QuerySelectField('Item Name: ',
+#                                query_factory=item_query,
+#                                allow_blank=True,
+#                                get_label='itemname')
+#    casecount = IntegerField('Cases Purchased: ',
+#                             default=0)
 
 
 class EnterPurchasesForm(FlaskForm):
@@ -79,6 +81,7 @@ class EnterPurchasesForm(FlaskForm):
                                 allow_blank=True,
                                 get_label='itemname')
     casecount = IntegerField('Cases Purchased: ', default=0)
+    eachcount = IntegerField('Each Purchased: ', default=0)
     submit = SubmitField('Submit!')
 
 
@@ -88,7 +91,9 @@ class UpdatePurchasesForm(FlaskForm):
     am_pm = HiddenField('PM')
     itemname = StringField('Item Name',
                            validators=[DataRequired()])
+    item_id = HiddenField(validators=[DataRequired()])
     casecount = IntegerField('Cases Purchased')
+    eachcount = IntegerField('Each Purchased')
     submit = SubmitField('Submit!')
 
 
@@ -117,3 +122,4 @@ class UpdateSalesForm(FlaskForm):
     eachcount = IntegerField('Each Sales: ')
     waste = IntegerField('Waste: ')
     submit = SubmitField('Submit!')
+    item_id = HiddenField(validators=[DataRequired()])

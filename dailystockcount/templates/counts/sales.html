@@ -70,7 +70,7 @@
           {% for item in sales_items%}
             {% if item.trans_date == group.trans_date  %}
               <div class="media-body">
-                <a class="me-2" href="{{ url_for('counts.update_sales', item_id=item.id) }}">{{ item.itemname }}</a>
+                <a class="me-2" href="{{ url_for('counts.update_sales', sales_id=item.id) }}">{{ item.itemname }}</a>
                 <small class="text-muted"> Total Sales  -  {{ item.eachcount }} / Waste  -  {{ item.waste }}</small>
               </div>
             {% endif %}

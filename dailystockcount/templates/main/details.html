@@ -6,7 +6,7 @@
     <div class="col-lg-12 p-1 pt-4">
       <div class="content-section">
         <div class="table-responsive-sm">
-          <legend class="mb-1">{{ item_name }}</legend>
+          <legend class="mb-1">{{ item_name.itemname }}</legend>
           <table class="table table-sm table-hover table-borderedless">
             <thead>
               <tr>
@@ -121,7 +121,7 @@
               labels: {{ labels | safe }},
               datasets: [{
                   label: "Sales",
-                data: {{ day_sales | safe }},
+                  data: {{ day_sales | safe }},
                   borderColor: "#c45850",
                   backgroundColor: "#c45850",
                   borderWidth:2,
@@ -139,7 +139,7 @@
             options: {
               title: {
                 display: true,
-                text: "{{ item_name }}",
+                text: "{{ item_name.itemname }}",
               }
             }
           });
@@ -147,71 +147,67 @@
       </div>
       </div>
     </div>
-  <!-- Chart2
+  <!-- Chart2 -->
     <div class="col-lg-6 p-1">
       <div class="content-section">
-      <div class="table-responsive-sm">
-        <canvas id="horzBarChart"></canvas>
-        <script>
-          var ctx = document.getElementById("horzBarChart").getContext("2d");
-          var horzBarChart = new Chart(ctx, {
-            type: "bar",
-            data: {
-              labels: ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"],
-              datasets: [{
-                axis: 'y'
-                label: "Daily Average Sales",
-                data: {{ daily_values | safe }},
-                fill: false,
-                backgroundColor: [
-                 'rgba(255, 99, 132, 0.2)',
-                 'rgba(255, 159, 64, 0.2)',
-                 'rgba(255, 205, 86, 0.2)',
-                 'rgba(75, 192, 192, 0.2)',
-                 'rgba(54, 162, 235, 0.2)',
-                 'rgba(153, 102, 255, 0.2)',
-                 'rgba(201, 203, 207, 0.2)'
-               ],
-               borderColor: [
-                 'rgb(255, 99, 132)',
-                 'rgb(255, 159, 64)',
-                 'rgb(255, 205, 86)',
-                 'rgb(75, 192, 192)',
-                 'rgb(54, 162, 235)',
-                 'rgb(153, 102, 255)',
-                 'rgb(201, 203, 207)'
-               ],
-               borderWidth: 1
-               }] 
-            },
-            options: {
-            }
-          });
-        </script>
-      </div>
+        <div class="table-responsive-sm">
+          <canvas id="barChart2"></canvas>
+          <script>
+            var ctx = document.getElementById("barChart2").getContext("2d");
+            var barChart2 = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                datasets: [{
+                  label: "Daily Sales Average",
+                  data: {{ values2 | safe }},
+                  fill: false,
+                  backgroundColor: [
+                   'rgba(255, 99, 132, 0.6)',
+                  ],
+                  borderColor: [
+                   'rgb(255, 99, 132)',
+                  ],
+                  borderWidth: 1
+                }, {
+                  label: "Average Sales/Day",
+                  data: {{ values3 | safe }},
+                  backgroundColor: 'rgba(0, 72, 186)',
+                  borderColor: 'rgb(0, 72, 186)',
+                  borderWidth: 1,
+                  type: 'line',
+                  fill: false,
+                }, {
+                  label: "Average Waste/Day",
+                  data: {{ values4 | safe }},
+                  backgroundColor: 'rgba(59, 122, 87)',
+                  borderColor: 'rgb(59, 122, 87)',
+                  borderWidth: 1,
+                  type: 'line',
+                  fill: false,
+                }] 
+              },
+              options: {
+              }
+            });
+          </script>
+        </div>
       </div>
     </div>
-  </div> -->
+  </div>
   <!-- weekly boxes
     <div class="col-lg-3 p-1">
       <div class="content-section bg-primary">
         <legend class="text-white mb-1">Average Sales per Day</legend>
-        <div class="card text-center text-dark bg-light">
-          <div class="card-body">
-            {% for d in monday_sales %}
-              <h5 class="card-text">Monday - {{ "%.1f"|format(d.average) }}</h5>
-            {% endfor %}
+        {% for d in daily_sales %}
+          <div class="card text-center text-dark bg-light">
+            <div class="card-body">
+              <h5 class="card-text">{{ d.dow }} - {{ "%.1f"|format(d.average) }}</h5>
+            </div>
           </div>
-        </div>
-        <div class="card text-center text-dark bg-light">
-          <div class="card-body">
-            {% for d in monday_sales %}
-              <h5 class="card-text">Tuesday - {{ "%.1f"|format(d.average) }}</h5>
-            {% endfor %}
-          </div>
-        </div>
+        {% endfor %}
       </div>
-    </div>
-  </div> -->
+    </div> -->
+  </div>
 </div>
 {% endblock content %}
