@@ -1,5 +1,5 @@
 ''' main/routes.py is the main flask routes page '''
-from datetime import timedelta, datetime, date
+from datetime import timedelta
 from flask import render_template, Blueprint, redirect, url_for, flash
 from flask_login import login_required
 from sqlalchemy import and_, func
@@ -50,9 +50,9 @@ def report_details(product):
     last_count = Invcount.query.order_by(Invcount.trans_date.desc()).first()
     end_date = last_count.trans_date
     weekly = end_date - timedelta(days=6)
-    # monthly = end_date - timedelta(days=27)
+    monthly = end_date - timedelta(days=27)
 
-    # Boxex Calculations
+    # Boxes Calculations
     count_daily = db.session.query(Invcount
                                    ).filter(Invcount.item_id == product,
                                             Invcount.count_time == "PM",
@@ -76,7 +76,7 @@ def report_details(product):
                                       ).filter(Invcount.item_id == product,
                                                Invcount.trans_date >= weekly).all()
 
-    # Charts
+    # Chart 1
     items_list = db.session.query(Invcount
                                   ).filter(Invcount.item_id == product,
                                            Invcount.count_time == "PM",
@@ -84,26 +84,41 @@ def report_details(product):
                                            ).order_by(Invcount.trans_date).all()
     labels = []
     values = []
+    day_sales = []
     for i in items_list:
         labels.append(i.trans_date.strftime('%A'))
         values.append(i.count_total)
+        sales_list = db.session.query(Sales).filter(
+            Sales.item_id == product,
+            Sales.trans_date == i.trans_date).first()
+        if sales_list:
+            day_sales.append(sales_list.sales_total)
+        else:
+            day_sales.append(0)
 
-    sales_list = db.session.query(Sales).filter(
-        Sales.item_id == product,
-        Sales.trans_date >= weekly).order_by(Sales.trans_date).all()
-    day_sales = []
-    for i in sales_list:
-        day_sales.append(i.sales_total)
+    # Chart #2
+    daily_sales = db.session.query(func.extract("dow", Sales.trans_date).label('dow'),
+                                   func.avg(Sales.eachcount).label('average')
+                                   ).filter(Sales.item_id == product,
+                                            Sales.trans_date >= monthly).group_by(
+                                                func.extract("dow", Sales.trans_date)).all()
 
-#  for day of week sales averages chart.
-#    monday_sales = db.session.query(Sales,
-#                                    func.sum(Sales.sales_total).label(
-#                                        'mon_tot')
-#                                    ).filter(Sales.item_id == product,
-#                                             func.extract(datetime(
-#                                                 Sales.trans_date, 'dow') == 0))
+    weekly_avg = db.session.query(Sales,
+                                  func.avg(Sales.eachcount).label('sales_avg'),
+                                  func.avg(Sales.waste).label('waste_avg')
+                                  ).filter(Sales.item_id == product,
+                                           Sales.trans_date >= monthly)
 
-    # Weekly Details Table
+    values2 = []
+    values3 = []
+    values4 = []
+    for d in daily_sales:
+        values2.append(d.average)
+        for w in weekly_avg:
+            values3.append(w.sales_avg)
+            values4.append(w.waste_avg)
+
+    # Details Table
     result = db.session.query(Invcount,
                               func.sum(Sales.eachcount).label('sales_count'),
                               func.sum(Sales.waste).label('sales_waste'),
@@ -132,7 +147,11 @@ def report_details(product):
                            on_hand_weekly=on_hand_weekly,
                            item_name=item_name,
                            labels=labels,
+                           labels2=labels,
                            values=values,
+                           values2=values2,
+                           values3=values3,
+                           values4=values4,
                            day_sales=day_sales,
-                           #                           monday_sales=monday_sales,
+                           daily_sales=daily_sales,
                            result=result)

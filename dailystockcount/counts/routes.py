@@ -223,7 +223,7 @@ def update_purchases(purchase_id):
                                form.casecount.data + form.eachcount.data)
         db.session.commit()
         flash('Item purchases have been updated!', 'success')
-#        calculate_totals(items_object.id)
+        calculate_totals(items_object.id)
         return redirect(url_for('counts.purchases'))
     elif request.method == 'GET':
         form.transdate.data = item.trans_date
@@ -242,7 +242,7 @@ def update_purchases(purchase_id):
 def delete_purchases(purchase_id):
     item = Purchases.query.get_or_404(purchase_id)
     unit = Items.query.filter_by(
-        itemname=item.itemname).first()
+        id=item.item_id).first()
     db.session.delete(item)
     db.session.commit()
     flash('Item purchases have been deleted!', 'success')
@@ -281,16 +281,16 @@ def sales():
                            ordered_sales=ordered_sales)
 
 
-@counts.route("/sales/<int:item_id>/update", methods=['GET', 'POST'])
+@counts.route("/sales/<int:sales_id>/update", methods=['GET', 'POST'])
 @login_required
-def update_sales(item_id):
+def update_sales(sales_id):
     ''' Update sales items '''
-    item = Sales.query.get_or_404(item_id)
+    item = Sales.query.get_or_404(sales_id)
     inv_items = Sales.query.all()
     form = UpdateSalesForm()
     if form.validate_on_submit():
         unit = Items.query.filter_by(
-            itemname=form.itemname.data).first()
+            id=form.item_id.data).first()
         item.trans_date = form.transdate.data
         item.itemname = form.itemname.data
         item.eachcount = form.eachcount.data
@@ -311,13 +311,13 @@ def update_sales(item_id):
                            item=item, legend='Update Sales')
 
 
-@counts.route("/sales/<int:item_id>/delete", methods=['POST'])
+@counts.route("/sales/<int:sales_id>/delete", methods=['POST'])
 @login_required
-def delete_sales(item_id):
+def delete_sales(sales_id):
     ''' Delete sales items '''
-    item = Sales.query.get_or_404(item_id)
+    item = Sales.query.get_or_404(sales_id)
     unit = Items.query.filter_by(
-        itemname=item.itemname).first()
+        id=item.item_id).first()
     db.session.delete(item)
     db.session.commit()
     flash('Item Sales have been deleted!', 'success')
