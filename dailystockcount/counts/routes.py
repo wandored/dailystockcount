@@ -93,6 +93,9 @@ def count():
 def update_count(count_id):
     ''' route for count/id/update '''
     item = Invcount.query.get_or_404(count_id)
+    if not item.item_id:
+        flash(f'{item.itemname} is not an active product!', 'warning')
+        return redirect(url_for('counts.count'))
     inv_items = Invcount.query.all()
     form = UpdateCountForm()
     if form.validate_on_submit():
@@ -210,6 +213,9 @@ def purchases():
 @login_required
 def update_purchases(purchase_id):
     item = Purchases.query.get_or_404(purchase_id)
+    if not item.item_id:
+        flash(f'{item.itemname} is not an active product!', 'warning')
+        return redirect(url_for('counts.purchases'))
     inv_items = Purchases.query.all()
     form = UpdatePurchasesForm()
     if form.validate_on_submit():
@@ -286,6 +292,9 @@ def sales():
 def update_sales(sales_id):
     ''' Update sales items '''
     item = Sales.query.get_or_404(sales_id)
+    if not item.item_id:
+        flash(f'{item.itemname} is not an active product!', 'warning')
+        return redirect(url_for('counts.sales'))
     inv_items = Sales.query.all()
     form = UpdateSalesForm()
     if form.validate_on_submit():
