@@ -98,10 +98,10 @@ def report_details(product):
 
     # Chart #2
     daily_sales = db.session.query(func.extract("dow", Sales.trans_date).label('dow'),
-                                   func.avg(Sales.eachcount).label('average')
-                                   ).filter(Sales.item_id == product,
-                                            Sales.trans_date >= monthly).group_by(
-                                                func.extract("dow", Sales.trans_date)).all()
+                                   func.avg(Sales.eachcount).label('average')). \
+        filter(Sales.item_id == product,
+               Sales.trans_date >= monthly). \
+        group_by(func.extract("dow", Sales.trans_date)).all()
 
     weekly_avg = db.session.query(Sales,
                                   func.avg(Sales.eachcount).label('sales_avg'),

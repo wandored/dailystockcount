@@ -42,6 +42,16 @@ def count():
         else:
             total_previous = previous_count.count_total
 
+        # Check if count exists for same day and time
+        double_count = Invcount.query.filter_by(
+            item_id=form.itemname.data.id,
+            trans_date=form.transdate.data,
+            count_time=form.am_pm.data
+        ).first()
+        if double_count is not None:
+            flash(f'{form.itemname.data.itemname} already has a {form.am_pm.data} count on {form.transdate.data}, please enter a different date or time', 'warning')
+            return redirect(url_for('counts.count'))
+
         # Calculate total purchases
         purchase_item = Purchases.query.filter_by(
             item_id=form.itemname.data.id,
@@ -60,8 +70,6 @@ def count():
         else:
             total_sales = sales_item.sales_total
 
-        date = form.transdate.data
-        time = form.am_pm.data
         inventory = Invcount(
             trans_date=form.transdate.data,
             count_time=form.am_pm.data,
@@ -80,8 +88,6 @@ def count():
         db.session.commit()
         flash(
             f'Count submitted for {form.itemname.data.itemname} on {form.transdate.data}!', 'success')
-        form.transdate.data = date
-        form.am_pm.data = time
         return redirect(url_for('counts.count'))
 
     return render_template('counts/count.html', title='Enter Count', form=form,
@@ -175,7 +181,6 @@ def purchases():
     ''' Enter new purchases '''
     purchase_items = Purchases.query.all()
     inv_items = Items.query.all()
-    item_number = Items.query.count()
 
     # Pagination
     page = request.args.get('page', 1, type=int)
@@ -187,6 +192,16 @@ def purchases():
     if form.validate_on_submit():
         items_object = Items.query.filter_by(
             id=form.itemname.data.id).first()
+
+        # Check if purchase exists for same day and time
+        double_purchase = Purchases.query.filter_by(
+            item_id=form.itemname.data.id,
+            trans_date=form.transdate.data
+        ).first()
+        if double_purchase is not None:
+            flash(f'{form.itemname.data.itemname} already has a purchase on {form.transdate.data}, please enter a different date or edit the existing purchase!', 'warning')
+            return redirect(url_for('counts.purchases'))
+
         purchase = Purchases(trans_date=form.transdate.data,
                              count_time='PM',
                              itemname=form.itemname.data.itemname,
@@ -269,6 +284,16 @@ def sales():
     if form.validate_on_submit():
         unit = Items.query.filter_by(
             id=form.itemname.data.id).first()
+
+        # Check if sales exists for same day and time
+        double_sales = Sales.query.filter_by(
+            item_id=form.itemname.data.id,
+            trans_date=form.transdate.data
+        ).first()
+        if double_sales is not None:
+            flash(f'{form.itemname.data.itemname} already has Sales on {form.transdate.data}, please enter a different date or edit the existing sale!', 'warning')
+            return redirect(url_for('counts.sales'))
+
         sale = Sales(trans_date=form.transdate.data,
                      count_time='PM',
                      itemname=form.itemname.data.itemname,
