@@ -8,6 +8,7 @@ dailystockcount/__pycache__/
 dailystockcount/main/__pycache__/
 dailystockcount/users/__pycache__/
 dailystockcount/counts/__pycache__/
-venv/
+.venv/
 downloads/
 dailystockcount/static/img/QRCode.svg
+dbfiles/

@@ -1,4 +1,7 @@
-''' dailystockcount app initialization '''
+"""
+dailystockcount app initialization
+"""
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -10,8 +13,8 @@ mail = Mail()
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
-login_manager.login_view = 'main.home'
-login_manager.login_message_category = 'info'
+login_manager.login_view = "main.home"
+login_manager.login_message_category = "info"
 
 
 def create_app(config_class=Config):
@@ -27,6 +30,7 @@ def create_app(config_class=Config):
     from dailystockcount.counts.routes import counts  # noqa
     from dailystockcount.main.routes import main  # noqa
     from dailystockcount.errors.handlers import errors  # noqa
+
     app.register_blueprint(users)
     app.register_blueprint(counts)
     app.register_blueprint(main)
