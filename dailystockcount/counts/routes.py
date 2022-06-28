@@ -1,4 +1,6 @@
-""" count/routes.py is flask routes for counts, purchases, sales and items. """
+"""
+count/routes.py is flask routes for counts, purchases, sales and items
+"""
 from flask import render_template, url_for, flash, redirect, request, Blueprint
 from flask_login import current_user, login_required
 from dailystockcount import db

@@ -11,3 +11,4 @@ dailystockcount/counts/__pycache__/
 .venv/
 downloads/
 dailystockcount/static/img/QRCode.svg
+dbfiles/
